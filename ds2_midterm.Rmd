@@ -1,0 +1,29 @@
+---
+title: "ds2_midterm"
+author: "haokun yuan"
+date: "3/17/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+```
+
+###Import and Merge Data
+
+```{r}
+feature_df = read_csv("./data/features.csv") %>% 
+  janitor::clean_names()
+store_df = read_csv("./data/stores.csv") %>% 
+  janitor::clean_names()
+test_df = read_csv("./data/test.csv") %>% 
+  janitor::clean_names()
+train_df = read_csv("./data/train.csv") %>% 
+  janitor::clean_names()
+
+test_new = left_join(test_df, feature_df) %>% 
+  left_join(., store_df)
+train_new = left_join(train_df, feature_df) %>% 
+  left_join(., store_df)
+```
+
