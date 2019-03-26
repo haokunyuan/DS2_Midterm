@@ -5,24 +5,103 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(corrplot)
+library(caret)
 ```
 
-## R Markdown
+### import data 
+```{r}
+raw_df_train = read_csv("data/walmart-recruiting-store-sales-forecasting/train.csv")
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+raw_df_stores = read_csv("data/walmart-recruiting-store-sales-forecasting/stores.csv")
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
-summary(cars)
+raw_df_ftrs = read_csv("data/walmart-recruiting-store-sales-forecasting/features.csv")
+
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+head(raw_df_train)
+head(raw_df_stores)
+head(raw_df_ftrs)
+dim(raw_df_train)
+dim(raw_df_stores)
+dim(raw_df_ftrs)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+df_merged = merge(merge(raw_df_train,raw_df_ftrs),raw_df_stores)
+```
+
+```{r}
+names(raw_df_train)
+names(raw_df_stores)
+names(raw_df_ftrs)
+names(df_merged)
+```
+
+
+```{r}
+unique(raw_df_train$Date) == unique(df_merged$Date)
+all.equal(unique(raw_df_train$IsHoliday) ,unique(df_merged$IsHoliday))
+all.equal(unique(raw_df_train$Date) ,unique(df_merged$Date))
+#colnames(raw_df_ftrs)[c(2,12)] = c("ftr_Date" ,"ftr_IsHoliday")
+# merge_1 = merge(raw_df_train,raw_df_ftrs)
+# merge_2 = merge(merge_1,raw_df_stores)
+head(df_merged)
+head(raw_df_ftrs)
+head(raw_df_train)
+
+```
+
+```{r}
+## change markdown to either have or don't have markdown 
+df_merged$MarkDown1 = ifelse(is.na(df_merged$MarkDown1),0,1)
+df_merged$MarkDown2 = ifelse(is.na(df_merged$MarkDown2),0,1)
+df_merged$MarkDown3 = ifelse(is.na(df_merged$MarkDown3),0,1)
+df_merged$MarkDown4 = ifelse(is.na(df_merged$MarkDown4),0,1)
+df_merged$MarkDown5 = ifelse(is.na(df_merged$MarkDown5),0,1)
+head(df_merged)
+table(df_merged$MarkDown1)
+```
+
+```{r}
+x = model.matrix(Weekly_Sales~.,df_merged)[,-1]
+y = df_merged$Weekly_Sales
+corrplot(cor(x))
+featurePlot(x,y,plot = "scatter",span=0.5,type = c("p","smooth"),layout=c(4,4))
+```
+
+```{r}
+hist(y)
+range(y)
+summary(y)
+hist(log10(y))
+
+head(df_merged)
+df_merged[,-c(2,3,15)]
+
+
+#pairs(df_merged[,-c(2,3,15)])
+#pairs(df_merged[,c(1,4)])
+```
+
+```{r}
+names(df_merged)
+```
+
+
+```{r}
+
+# ggplot(aes(x = df_merged["Size"], y = df_merged["Weekly_Sales"]),data = df_merged)+
+#   geom_point()
+
+ggplot(aes(x = Size, y = Weekly_Sales),data = df_merged) +
+  geom_point()
+
+ggplot(aes(x = Fuel_Price, y = log(Weekly_Sales)),data = df_merged) +
+  geom_smooth(method = "loess", formula = y ~ x)
+
+#?geom_smooth()
+```
