@@ -12,12 +12,9 @@ library(caret)
 
 ### import data 
 ```{r}
-raw_df_train = read_csv("data/walmart-recruiting-store-sales-forecasting/train.csv")
-
-raw_df_stores = read_csv("data/walmart-recruiting-store-sales-forecasting/stores.csv")
-
-
-raw_df_ftrs = read_csv("data/walmart-recruiting-store-sales-forecasting/features.csv")
+raw_df_train = read_csv("data/train.csv")
+raw_df_stores = read_csv("data/stores.csv")
+raw_df_ftrs = read_csv("data/features.csv")
 
 ```
 
@@ -69,8 +66,9 @@ table(df_merged$MarkDown1)
 ```{r}
 x = model.matrix(Weekly_Sales~.,df_merged)[,-1]
 y = df_merged$Weekly_Sales
+# these 2 take a lot recourcese 
 corrplot(cor(x))
-featurePlot(x,y,plot = "scatter",span=0.5,type = c("p","smooth"),layout=c(4,4))
+#featurePlot(x,y,plot = "scatter",span=0.5,type = c("p","smooth"),layout=c(4,4))
 ```
 
 ```{r}
@@ -97,11 +95,9 @@ names(df_merged)
 # ggplot(aes(x = df_merged["Size"], y = df_merged["Weekly_Sales"]),data = df_merged)+
 #   geom_point()
 
-ggplot(aes(x = Size, y = Weekly_Sales),data = df_merged) +
-  geom_point()
+ggplot(aes(x = Size, y = Weekly_Sales),data = df_merged) + geom_point()
 
-ggplot(aes(x = Fuel_Price, y = log(Weekly_Sales)),data = df_merged) +
-  geom_smooth(method = "loess", formula = y ~ x)
+#ggplot(aes(x = Fuel_Price, y = log(Weekly_Sales)),data = df_merged) + geom_smooth(method = "loess", formula = y ~ x)
 
 #?geom_smooth()
 ```
