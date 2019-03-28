@@ -17,3 +17,15 @@ head(df_merged)
 table(df_merged$MarkDown1)
 
 str(df_merged$Date)
+
+library(lubridate)
+
+df_merged$week_of_year = week(df_merged$Date)
+
+# tail(df_merged,10)
+# hist(df_merged$week_of_year)
+
+write.csv(df_merged,"data/merged_data_1.csv")
+
+skimr::skim(df_merged)
+
