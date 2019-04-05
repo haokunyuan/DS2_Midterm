@@ -92,34 +92,8 @@ y = df$weekly_sales
 corrplot(cor(x))
 ```
 
-model
 
-```{r}
-ridge.model = glmnet(x, y, alpha = 0, lambda = exp(seq(-1, 10, length = 100)))
-mat.coef = coef(ridge.model)
-dim(mat.coef)
-
-set.seed(1)
-cv.ridge = cv.glmnet(x, y,
-                     alpha = 0,
-                     lambda = exp(seq(-1,10, length = 100)),
-                     type.measure = "mse")
-plot(cv.ridge)
-best.lambda = cv.ridge$lambda.min # 3.394723
-predict(ridge.model,s = best.lambda, type = "coefficients")
-```
-
-# lasso
-
-```{r}
-cv.lasso = cv.glmnet(x, y, 
-                  alpha = 1,
-                  lambda = exp(seq(-1, 10, length = 100)))
-best_lambda = cv.lasso$lambda.min
-predict(cv.lasso,s = best.lambda, type = "coefficients")
-```
-
-# test performance
+# ridge
 
 ```{r}
 ctrl1 = trainControl(method = "repeatedcv", number = 10, repeats = 5)
