@@ -9,6 +9,7 @@ output: html_document
 library(tidyverse)
 library(corrplot)
 library(caret)
+library(glmnet)
 ```
 
 
@@ -20,6 +21,12 @@ raw_df_stores = read_csv("data/stores.csv")
 raw_df_ftrs = read_csv("data/features.csv")
 raw_df_test = read_csv("data/test.csv")
 df_merged = merge(merge(raw_df_train,raw_df_ftrs),raw_df_stores)
+
+library(lubridate)
+
+df_merged$week_of_year = week(df_merged$Date)
+
+  
 ```
 
 ```{r}
@@ -29,9 +36,6 @@ all.equal(unique(raw_df_train$Date) ,unique(df_merged$Date))
 #colnames(raw_df_ftrs)[c(2,12)] = c("ftr_Date" ,"ftr_IsHoliday")
 # merge_1 = merge(raw_df_train,raw_df_ftrs)
 # merge_2 = merge(merge_1,raw_df_stores)
-head(df_merged)
-head(raw_df_ftrs)
-head(raw_df_train)
 
 ```
 
@@ -74,11 +78,80 @@ table(df_cleaned$month)
 
 summary(is.na(df_cleaned)) ### only markdown variable have NA
 summary(is.na(df_cleaned$markdown_amount))
+
+df1 = na.omit(df_cleaned) %>% 
+  mutate(dept = as.factor(dept))
+df = sample_frac(df1, 0.01, replace = TRUE)
+
 ```
 
-# EXPLORTORY 
 
+```{r}
+x = model.matrix(weekly_sales~., df)[,-1]
+y = df$weekly_sales
+corrplot(cor(x))
+```
 
+model
 
+```{r}
+ridge.model = glmnet(x, y, alpha = 0, lambda = exp(seq(-1, 10, length = 100)))
+mat.coef = coef(ridge.model)
+dim(mat.coef)
 
+set.seed(1)
+cv.ridge = cv.glmnet(x, y,
+                     alpha = 0,
+                     lambda = exp(seq(-1,10, length = 100)),
+                     type.measure = "mse")
+plot(cv.ridge)
+best.lambda = cv.ridge$lambda.min # 3.394723
+predict(ridge.model,s = best.lambda, type = "coefficients")
+```
+
+# lasso
+
+```{r}
+cv.lasso = cv.glmnet(x, y, 
+                  alpha = 1,
+                  lambda = exp(seq(-1, 10, length = 100)))
+best_lambda = cv.lasso$lambda.min
+predict(cv.lasso,s = best.lambda, type = "coefficients")
+```
+
+# test performance
+
+```{r}
+ctrl1 = trainControl(method = "repeatedcv", number = 10, repeats = 5)
+set.seed(2)
+ridge.fit = train(x,y,
+                  method = "glmnet",
+                  tuneGrid = expand.grid(alpha = 0,
+                                         lambda = exp(seq(-1,10, length = 100))),
+                  trControl = ctrl1)
+plot(ridge.fit, xTrans = function(x)log(x))
+ridge.fit$bestTune
+coef(ridge.fit$finalModel, ridge.fit$bestTune$lambda)
+```
+
+#lasso
+
+```{r}
+set.seed(2)
+lasso.fit = train(x, y,
+                  method = "glmnet",
+                  tuneGrid = expand.grid(alpha = 1,
+                                         lambda = exp(seq(-1,10, length = 100))),
+                  trControl = ctrl1)
+plot(lasso.fit, xTrans = function(x)log(x))
+coef(lasso.fit$finalModel, ridge.fit$bestTune$lambda)
+
+```
+
+test_performance
+
+```{r}
+resamp = resamples(list(lass = lasso.fit, ridge = ridge.fit))
+summary(resamp)
+```
 
