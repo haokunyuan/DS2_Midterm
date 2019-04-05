@@ -1,0 +1,64 @@
+---
+title: "Sc456"
+author: "Siyan Chen"
+date: "4/5/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(corrplot)
+library(caret)
+```
+
+
+### import data 
+
+```{r}
+raw_df_train = read_csv("data/train.csv")
+raw_df_stores = read_csv("data/stores.csv")
+raw_df_ftrs = read_csv("data/features.csv")
+raw_df_test = read_csv("data/test.csv")
+df_merged = merge(merge(raw_df_train,raw_df_ftrs),raw_df_stores)
+```
+
+```{r}
+unique(raw_df_train$Date) == unique(df_merged$Date)
+all.equal(unique(raw_df_train$IsHoliday) ,unique(df_merged$IsHoliday))
+all.equal(unique(raw_df_train$Date) ,unique(df_merged$Date))
+#colnames(raw_df_ftrs)[c(2,12)] = c("ftr_Date" ,"ftr_IsHoliday")
+# merge_1 = merge(raw_df_train,raw_df_ftrs)
+# merge_2 = merge(merge_1,raw_df_stores)
+head(df_merged)
+head(raw_df_ftrs)
+head(raw_df_train)
+
+```
+
+### we cannot change to 0 and 1-------
+
+```{r}
+## change markdown to either have or don't have markdown 
+#df_merged$MarkDown1 = ifelse(is.na(df_merged$MarkDown1),0,1)
+#df_merged$MarkDown2 = ifelse(is.na(df_merged$MarkDown2),0,1)
+#df_merged$MarkDown3 = ifelse(is.na(df_merged$MarkDown3),0,1)
+#df_merged$MarkDown4 = ifelse(is.na(df_merged$MarkDown4),0,1)
+#df_merged$MarkDown5 = ifelse(is.na(df_merged$MarkDown5),0,1)
+table(df_merged$MarkDown1)
+```
+
+# CLEAN DATA
+
+```{r}
+df_cleaned = df_merged %>% 
+  janitor::clean_names() %>% 
+  separate(date, into = c("year", "month", "date"), sep = "-") %>% 
+  gather(key = holiday_markdown, value = whether_markdown, mark_down1:mark_down5)
+table(df_cleaned$year)
+table(df_cleaned$month)
+summary(is.na(df_cleaned))
+```
+
+
+
+
