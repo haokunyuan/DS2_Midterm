@@ -33,7 +33,7 @@ df_merged$year = year(df_merged$Date)
 head(df_merged)
 skimr::skim(df_merged)
 
-
+#write.csv(df_merged,"data/merged_data_2.csv")
 # how many years 
 unique(df_merged$year)  # 3 unique years 
 #QC if month is corerct 
@@ -43,6 +43,7 @@ hist(df_merged$month)
 # missing data for 2012 # nov and dec 
 ggplot(df_merged) +
   geom_histogram(aes(x = month_of_year, fill = as.factor(year)))
+
 
 
 
