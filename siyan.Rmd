@@ -50,14 +50,34 @@ table(df_merged$MarkDown1)
 # CLEAN DATA
 
 ```{r}
-df_cleaned = df_merged %>% 
+# 2011 before December: no markdown, NA change to 0, other NA kept
+df_cleaned1 = df_merged %>% 
   janitor::clean_names() %>% 
   separate(date, into = c("year", "month", "date"), sep = "-") %>% 
-  gather(key = holiday_markdown, value = whether_markdown, mark_down1:mark_down5)
+  gather(key = holiday_markdown, value = markdown_amount, mark_down1:mark_down5)
+
+df_cleaned2 = df_merged %>% 
+  janitor::clean_names() %>% 
+  separate(date, into = c("year", "month", "date"), sep = "-") %>% 
+  gather(key = holiday_markdown, value = markdown_amount, mark_down1:mark_down5)%>% 
+  filter(year == 2011 & month < 12)
+
+df_cleaned2$markdown_amount=ifelse(is.na(df_cleaned2$markdown_amount),0,1)
+
+df_cleaned3 = anti_join(df_cleaned1, df_cleaned2)
+df_cleaned = rbind(df_cleaned2,df_cleaned3)
+  
+
+  
 table(df_cleaned$year)
 table(df_cleaned$month)
-summary(is.na(df_cleaned))
+
+summary(is.na(df_cleaned)) ### only markdown variable have NA
+summary(is.na(df_cleaned$markdown_amount))
 ```
+
+# EXPLORTORY 
+
 
 
 

@@ -881,37 +881,59 @@ table(df_merged$MarkDown1)</code></pre>
 </div>
 <div id="clean-data" class="section level1">
 <h1>CLEAN DATA</h1>
-<pre class="r"><code>df_cleaned = df_merged %&gt;% 
+<pre class="r"><code># 2011 before December: no markdown, NA change to 0, other NA kept
+df_cleaned1 = df_merged %&gt;% 
   janitor::clean_names() %&gt;% 
   separate(date, into = c(&quot;year&quot;, &quot;month&quot;, &quot;date&quot;), sep = &quot;-&quot;) %&gt;% 
-  gather(key = holiday_markdown, value = whether_markdown, mark_down1:mark_down5)
+  gather(key = holiday_markdown, value = markdown_amount, mark_down1:mark_down5)
+
+df_cleaned2 = df_merged %&gt;% 
+  janitor::clean_names() %&gt;% 
+  separate(date, into = c(&quot;year&quot;, &quot;month&quot;, &quot;date&quot;), sep = &quot;-&quot;) %&gt;% 
+  gather(key = holiday_markdown, value = markdown_amount, mark_down1:mark_down5)%&gt;% 
+  filter(year == 2011 &amp; month &lt; 12)
+
+df_cleaned2$markdown_amount=ifelse(is.na(df_cleaned2$markdown_amount),0,1)
+
+df_cleaned3 = anti_join(df_cleaned1, df_cleaned2)</code></pre>
+<pre><code>## Joining, by = c(&quot;store&quot;, &quot;year&quot;, &quot;month&quot;, &quot;date&quot;, &quot;is_holiday&quot;, &quot;dept&quot;, &quot;weekly_sales&quot;, &quot;temperature&quot;, &quot;fuel_price&quot;, &quot;cpi&quot;, &quot;unemployment&quot;, &quot;type&quot;, &quot;size&quot;, &quot;holiday_markdown&quot;, &quot;markdown_amount&quot;)</code></pre>
+<pre class="r"><code>df_cleaned = rbind(df_cleaned2,df_cleaned3)
+  
+
+  
 table(df_cleaned$year)</code></pre>
 <pre><code>## 
-##   2010   2011   2012 
-## 703395 767265 637190</code></pre>
+##    2010    2011    2012 
+##  703395 1459295  637190</code></pre>
 <pre class="r"><code>table(df_cleaned$month)</code></pre>
 <pre><code>## 
 ##     01     02     03     04     05     06     07     08     09     10 
-## 117725 177630 192255 206660 176570 190685 204900 190845 191695 191810 
+## 176200 236335 251320 280390 235670 249300 278005 249670 265500 250910 
 ##     11     12 
-## 118065 149010</code></pre>
-<pre class="r"><code>summary(is.na(df_cleaned))</code></pre>
+## 177570 149010</code></pre>
+<pre class="r"><code>summary(is.na(df_cleaned)) ### only markdown variable have NA</code></pre>
 <pre><code>##    store            year           month            date        
 ##  Mode :logical   Mode :logical   Mode :logical   Mode :logical  
-##  FALSE:2107850   FALSE:2107850   FALSE:2107850   FALSE:2107850  
+##  FALSE:2799880   FALSE:2799880   FALSE:2799880   FALSE:2799880  
 ##                                                                 
 ##  is_holiday         dept         weekly_sales    temperature    
 ##  Mode :logical   Mode :logical   Mode :logical   Mode :logical  
-##  FALSE:2107850   FALSE:2107850   FALSE:2107850   FALSE:2107850  
+##  FALSE:2799880   FALSE:2799880   FALSE:2799880   FALSE:2799880  
 ##                                                                 
 ##  fuel_price         cpi          unemployment       type        
 ##  Mode :logical   Mode :logical   Mode :logical   Mode :logical  
-##  FALSE:2107850   FALSE:2107850   FALSE:2107850   FALSE:2107850  
+##  FALSE:2799880   FALSE:2799880   FALSE:2799880   FALSE:2799880  
 ##                                                                 
-##     size         holiday_markdown whether_markdown
-##  Mode :logical   Mode :logical    Mode :logical   
-##  FALSE:2107850   FALSE:2107850    FALSE:685419    
+##     size         holiday_markdown markdown_amount
+##  Mode :logical   Mode :logical    Mode :logical  
+##  FALSE:2799880   FALSE:2799880    FALSE:1377449  
 ##                                   TRUE :1422431</code></pre>
+<pre class="r"><code>summary(is.na(df_cleaned$markdown_amount))</code></pre>
+<pre><code>##    Mode   FALSE    TRUE 
+## logical 1377449 1422431</code></pre>
+</div>
+<div id="explortory" class="section level1">
+<h1>EXPLORTORY</h1>
 </div>
 
 
