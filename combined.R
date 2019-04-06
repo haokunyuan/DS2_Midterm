@@ -3,6 +3,11 @@ library(splines)
 library(mgcv)
 library(tidyverse)
 library(ggplot2)
+#------
+library(doParallel)
+cl <- makePSOCKcluster(5)
+registerDoParallel(cl)
+#------
 
 df = read_csv("data/merged_data_2.csv") %>% janitor::clean_names()
 names(df)
@@ -26,6 +31,29 @@ test.data  <- df_cleaned[-train_ind, ]
 ctrl1 = trainControl(method = "repeatedcv", number = 10, repeats = 5)
 ctr2 = trainControl("cv", number = 10)
 lambda <- 10^seq(-3, 3, length = 100)
+
+#lasso
+set.seed(123)
+lasso <- train(
+  weekly_sales ~., data = train.data, method = "glmnet",
+  trControl = trainControl("cv", number = 10),
+  tuneGrid = expand.grid(alpha = 1, lambda = lambda),
+  allowParallel=TRUE
+)
+plot(lasso)
+# Model coefficients
+coef(lasso$finalModel, lasso$bestTune$lambda)
+# Make predictions
+predictions <- lasso %>% predict(test.data)
+# Model prediction performance
+data.frame(
+  RMSE = RMSE(predictions, test.data$medv),
+  Rsquare = R2(predictions, test.data$medv)
+)
+
+
+
+#ridge
 set.seed(123)
 ridge <- train(
   weekly_sales ~., data = train.data, method = "glmnet",
@@ -36,24 +64,6 @@ ridge <- train(
 coef(ridge$finalModel, ridge$bestTune$lambda)
 # Make predictions
 predictions <- ridge %>% predict(test.data)
-# Model prediction performance
-data.frame(
-  RMSE = RMSE(predictions, test.data$medv),
-  Rsquare = R2(predictions, test.data$medv)
-)
-
-#lasso
-set.seed(123)
-lasso <- train(
-  weekly_sales ~., data = train.data, method = "glmnet",
-  trControl = trainControl("cv", number = 10),
-  tuneGrid = expand.grid(alpha = 1, lambda = lambda)
-)
-plot(lasso)
-# Model coefficients
-coef(lasso$finalModel, lasso$bestTune$lambda)
-# Make predictions
-predictions <- lasso %>% predict(test.data)
 # Model prediction performance
 data.frame(
   RMSE = RMSE(predictions, test.data$medv),
