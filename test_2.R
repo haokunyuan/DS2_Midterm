@@ -5,6 +5,7 @@ library(tidyverse)
 library(ggplot2)
 library(glmnet)
 library(pls)
+library(randomForest)
 #====== 
 # data Transformation
 # there are 80 unique departments and we need to group them into smaller category
@@ -14,7 +15,7 @@ library(pls)
 df = read_csv("data/merged_data_2.csv") %>% janitor::clean_names()
 df_useful = df[,c("weekly_sales","store","is_holiday","dept","temperature","fuel_price","cpi","unemployment","type","size","week_of_year","year","month_of_year")]
 
-df_1percent = df_useful
+df_1percent = sample_frac(df_useful,0.5)
 df_1percent =
   df_1percent %>%
   group_by(dept) %>%
@@ -29,7 +30,7 @@ df_1percent$dept_rank %>% hist()
 df_1percent$store = as.factor(df_1percent$store)
 df_1percent$type = as.factor(df_1percent$type)
 df_1percent$dept_rank = as.factor(df_1percent$dept_rank)
-df_1percent = subset(df_1percent,select = -c(dept,dept_ave_sales,store))
+df_1percent = subset(df_1percent,select = -c(dept,dept_ave_sales))
 # done transform
 
 
@@ -49,7 +50,7 @@ y <- train.data$weekly_sales
 newx =  model.matrix(weekly_sales~.,test.data)[,-1]
 newy =  test.data$weekly_sales
 
-corrplot::corrplot(cor(x))
+
 
 # linear model 
 lm.fit <- lm(weekly_sales~., data = train.data)
@@ -103,7 +104,7 @@ summary(pcr.mod)
 validationplot(pcr.mod, val.type="MSEP", legendpos = "topright")
 
 predy2.pcr <- predict(pcr.mod, newdata = df_1percent[-train_ind,], 
-                      ncomp = 9)
+                      ncomp = 51)
 # test MSE
 mean((predy2.pcr-newy)^2) %>% sqrt()
 
@@ -123,14 +124,15 @@ summary(pls.mod)
 validationplot(pls.mod, val.type="MSEP", legendpos = "topright")
 
 predy2.pls <- predict(pls.mod, newdata = df_1percent[-train_ind,], 
-                      ncomp = 2)
+                      ncomp = 8)
 # test MSE
 mean((predy2.pls-newy)^2) %>% sqrt()
 
 
 
 # GAM 
-gam.m1 <- gam(weekly_sales ~ 
+gam.m1 <- gam(weekly_sales ~
+                store+
                 is_holiday+
                 temperature+
                 fuel_price+
@@ -144,6 +146,7 @@ gam.m1 <- gam(weekly_sales ~
                 dept_rank, 
               data = train.data)
 gam.m2 <- gam(weekly_sales ~ 
+                store+
                 is_holiday+
                 s(temperature)+
                 s(fuel_price)+
@@ -157,7 +160,7 @@ gam.m2 <- gam(weekly_sales ~
                 dept_rank, 
               data = train.data)
 
-anova(gam.m1)
+
 anova(gam.m1, gam.m2, test = "F")
 par(mfrow=c(2,4))
 plot(gam.m2,se=TRUE,col = "red")

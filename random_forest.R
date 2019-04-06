@@ -4,15 +4,9 @@ library(mgcv)
 library(tidyverse)
 library(ggplot2)
 library(glmnet)
+library(pls)
+library(randomForest)
 #====== 
-#install.packages("AmesHousing")
-#install.packages("rsample")
-library(rsample)      # data splitting 
-library(randomForest) # basic implementation
-library(ranger)       # a faster implementation of randomForest
-library(caret)        # an aggregator package for performing many machine learning models
-library(h2o)          # an extremely fast java-based platform
-
 # data Transformation
 # there are 80 unique departments and we need to group them into smaller category
 # base on their mean sales
@@ -21,7 +15,7 @@ library(h2o)          # an extremely fast java-based platform
 df = read_csv("data/merged_data_2.csv") %>% janitor::clean_names()
 df_useful = df[,c("weekly_sales","store","is_holiday","dept","temperature","fuel_price","cpi","unemployment","type","size","week_of_year","year","month_of_year")]
 
-df_1percent = sample_frac(df_useful,0.1)
+df_1percent = sample_frac(df_useful,0.5)
 df_1percent =
   df_1percent %>%
   group_by(dept) %>%
@@ -36,22 +30,42 @@ df_1percent$dept_rank %>% hist()
 df_1percent$store = as.factor(df_1percent$store)
 df_1percent$type = as.factor(df_1percent$type)
 df_1percent$dept_rank = as.factor(df_1percent$dept_rank)
-df_1percent = subset(df_1percent,select = -c(dept,dept_ave_sales))
+df_1percent = subset(df_1percent,select = -c(dept,dept_ave_sales,store))
+# done transform
 
 
 
 
-
-
-
+# seperate test and train 
+smp_size <- floor(0.75 * nrow(df_1percent))
 set.seed(123)
-ames_split <- initial_split(df_cleaned, prop = .7)
-ames_train <- training(ames_split)
-ames_test  <- testing(ames_split)
+train_ind <- sample(seq_len(nrow(df_1percent)), size = smp_size)
 
+train.data <- df_1percent[train_ind, ]
+test.data  <- df_1percent[-train_ind, ]
+
+x <- model.matrix(weekly_sales~.,train.data)[,-1]
+y <- train.data$weekly_sales
+
+newx =  model.matrix(weekly_sales~.,test.data)[,-1]
+newy =  test.data$weekly_sales
+
+
+
+#randome forest 
 m1 <- randomForest(
   formula = weekly_sales ~ .,
-  data    = ames_train
+  data    = train.data,
+  keep.forest=TRUE,
+  importance=FALSE,
+  proximity=F,
+  ntree=100,
+  do.trace=5,
+  nodesize=500
 )
 
-m1
+plot(m1)
+
+mean((predict(m1,newdata = test.data)-test.data$weekly_sales)^2) %>% sqrt()
+importance(m1)
+varImpPlot(m1)

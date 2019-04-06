@@ -174,12 +174,21 @@ mean((gam.pred-newy)^2) %>% sqrt()
 #   formula = weekly_sales ~ .,
 #   data    = train.data,
 #   keep.forest=TRUE,
-#   importance=TRUE,
+#   importance=FALSE,
+#   proximity=F,
 #   ntree=250,
 #   do.trace=5,
+#   nodesize=1000
 # )
 # 
-# m1
+# plot(m1)
+# 
+# mean((predict(m1,newdata = test.data)-test.data$weekly_sales)^2) %>% sqrt()
+# varImp(m1)
+# importance(m1)
+# varImpPlot(m1)
+
+
 
 #lm 
 mean((predict(lm.fit,newdata = test.data ) - newy)^2) %>% sqrt()
