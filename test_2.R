@@ -5,7 +5,6 @@ library(tidyverse)
 library(ggplot2)
 library(glmnet)
 library(pls)
-library(randomForest)
 #====== 
 # data Transformation
 # there are 80 unique departments and we need to group them into smaller category
@@ -15,7 +14,7 @@ library(randomForest)
 df = read_csv("data/merged_data_2.csv") %>% janitor::clean_names()
 df_useful = df[,c("weekly_sales","store","is_holiday","dept","temperature","fuel_price","cpi","unemployment","type","size","week_of_year","year","month_of_year")]
 
-df_1percent = sample_frac(df_useful,0.5)
+df_1percent = df_useful
 df_1percent =
   df_1percent %>%
   group_by(dept) %>%
@@ -143,7 +142,7 @@ gam.m1 <- gam(weekly_sales ~
                 year+
                 month_of_year+
                 dept_rank, 
-                data = train.data)
+              data = train.data)
 gam.m2 <- gam(weekly_sales ~ 
                 is_holiday+
                 s(temperature)+
@@ -169,13 +168,6 @@ gam.pred = predict(gam.m2, newdata = test.data,type = "response")
 # test MSE
 mean((gam.pred-newy)^2) %>% sqrt()
 
-#randome forest 
-m1 <- randomForest(
-  formula = weekly_sales ~ .,
-  data    = train.data
-)
-
-m1
 
 #lm 
 mean((predict(lm.fit,newdata = test.data ) - newy)^2) %>% sqrt()
