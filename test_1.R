@@ -170,12 +170,16 @@ gam.pred = predict(gam.m2, newdata = test.data,type = "response")
 mean((gam.pred-newy)^2) %>% sqrt()
 
 #randome forest 
-m1 <- randomForest(
-  formula = weekly_sales ~ .,
-  data    = train.data
-)
-
-m1
+# m1 <- randomForest(
+#   formula = weekly_sales ~ .,
+#   data    = train.data,
+#   keep.forest=TRUE,
+#   importance=TRUE,
+#   ntree=250,
+#   do.trace=5,
+# )
+# 
+# m1
 
 #lm 
 mean((predict(lm.fit,newdata = test.data ) - newy)^2) %>% sqrt()
