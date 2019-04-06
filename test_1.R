@@ -68,7 +68,7 @@ cv.lasso$lambda.1se
 cv.lasso$lambda.min
 predict(cv.lasso, s="lambda.min", type="coefficients")
 
-sum((predict(cv.lasso, newx = newx ,s="lambda.min", type="response") - newy)^2) %>% sqrt()
+mean((predict(cv.lasso, newx = newx ,s="lambda.min", type="response") - newy)^2) %>% sqrt()
 
 
 # ridge
@@ -83,9 +83,9 @@ cv.ridge$lambda.1se
 cv.ridge$lambda.min
 predict(cv.ridge, s="lambda.min", type="coefficients")
 
-sum((predict(cv.ridge, newx = newx ,s="lambda.min", type="response") - newy)^2) %>% sqrt()
+mean((predict(cv.ridge, newx = newx ,s="lambda.min", type="response") - newy)^2) %>% sqrt()
 
-mean((predict(cv.ridge, newx = newx ,s="lambda.min", type="response") - newy)^2)
+mean((predict(cv.ridge, newx = newx ,s="lambda.min", type="response") - newy)^2)%>% sqrt()
 ## PCR
 ## Principal components regression (PCR)
 
@@ -105,5 +105,26 @@ validationplot(pcr.mod, val.type="MSEP", legendpos = "topright")
 predy2.pcr <- predict(pcr.mod, newdata = df_1percent[-train_ind,], 
                       ncomp = 9)
 # test MSE
-mean((predy2.pcr-newy)^2) 
+mean((predy2.pcr-newy)^2) %>% sqrt()
+
+
+
+## Partial least squares (PLS)
+
+#We fit the PLS model using the function `plsr()`.
+
+set.seed(2)
+pls.mod <- plsr(weekly_sales~., 
+                data = df_1percent[train_ind,],
+                scale = TRUE, 
+                validation = "CV")
+
+summary(pls.mod)
+validationplot(pls.mod, val.type="MSEP", legendpos = "topright")
+
+predy2.pls <- predict(pls.mod, newdata = df_1percent[-train_ind,], 
+                      ncomp = 2)
+# test MSE
+mean((predy2.pls-newy)^2) %>% sqrt()
+
 
