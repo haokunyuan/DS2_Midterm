@@ -11,17 +11,28 @@ library(randomForest)
 # there are 80 unique departments and we need to group them into smaller category
 # base on their mean sales
 
-
+dev.off()
 df = read_csv("data/merged_data_2.csv") %>% janitor::clean_names()
 df_useful = df[,c("weekly_sales","store","is_holiday","dept","temperature","fuel_price","cpi","unemployment","type","size","week_of_year","year","month_of_year")]
+quantile(df$weekly_sales, seq(0,1,0.1)) 
+foo = quantile(df$weekly_sales, seq(0,1,0.1))
 
-df_1percent = sample_frac(df_useful,0.5)
+df_1percent = sample_frac(df_useful,0.1)
 df_1percent =
   df_1percent %>%
   group_by(dept) %>%
   mutate(dept_ave_sales = mean(weekly_sales),
-         dept_rank = ifelse(dept_ave_sales<6000,1,
-                            ifelse(dept_ave_sales<16000,2,3)))
+         dept_rank = ifelse(dept_ave_sales<foo[1],1,
+                            ifelse(dept_ave_sales<foo[2],2,
+                                   ifelse(dept_ave_sales<foo[3],3, 
+                                          ifelse(dept_ave_sales<foo[4],4,
+                                                 ifelse(dept_ave_sales<foo[5],5,
+                                                        ifelse(dept_ave_sales<foo[6],6,
+                                                               ifelse(dept_ave_sales<foo[7],7,
+                                                                      ifelse(dept_ave_sales<foo[8],8,
+                                                                             ifelse(dept_ave_sales<foo[9],9,10))))))))))
+
+
 
 
 # foo$dept_ave_sales %>% hist()
@@ -100,7 +111,12 @@ pcr.mod <- pcr(weekly_sales~.,
                validation = "CV")
 
 summary(pcr.mod)
+predplot(pcr.mod)
+coefplot(pcr.mod)
 
+
+# Plot the R2
+validationplot(pcr.mod, val.type = "R2")
 validationplot(pcr.mod, val.type="MSEP", legendpos = "topright")
 
 predy2.pcr <- predict(pcr.mod, newdata = df_1percent[-train_ind,], 
