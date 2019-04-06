@@ -1,4 +1,4 @@
-library(caret) # only for plot
+library(caret)
 library(splines)
 library(mgcv)
 library(tidyverse)
@@ -6,12 +6,18 @@ library(ggplot2)
 
 df = read_csv("data/merged_data_2.csv") %>% janitor::clean_names()
 
+# names(df)
+# 
+# df_cleaned = df[c("weekly_sales","is_holiday","dept","store",
+#                   "temperature","year","month_of_year","week_of_year")]
+# names(df_cleaned)
+
 names(df)
-
-df_cleaned = df[c("weekly_sales","is_holiday","dept","store",
-                  "temperature","year","month_of_year","week_of_year")]
+df_cleaned = df[c(-1,-9:-13)]
+df_cleaned$dept = as.factor(df_cleaned$dept)
+df_cleaned$type = as.factor(df_cleaned$type)
 names(df_cleaned)
-
+head(df_cleaned)
 # df_cleaned$month_of_year = as.factor(df_cleaned$month_of_year)
 # df_cleaned$year = as.factor(df_cleaned$year)
  # df_cleaned$Dept = as.factor(df_cleaned$Dept)
@@ -65,10 +71,6 @@ plot(fit.ss)
 summary(fit.ss)
 names(df_cleaned)
 
-names(df)
-df_cleaned = df[c(-1,-9:-13)]
-#df_cleaned$dept = as.factor(df_cleaned$dept)
-df_cleaned$type = as.factor(df_cleaned$type)
 
 
 # seperate test and train 
