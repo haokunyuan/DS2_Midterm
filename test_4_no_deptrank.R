@@ -133,8 +133,12 @@ coefplot(pcr.mod)
 validationplot(pcr.mod, val.type = "R2")
 validationplot(pcr.mod, val.type="MSEP", legendpos = "topright")
 
+selectNcomp(pcr.mod, method = c("randomization"),
+            ncomp = pcr.mod$ncomp)
+
 predy2.pcr <- predict(pcr.mod, newdata = df_1percent[-train_ind,], 
-                      ncomp = 131)
+                      ncomp = 129)
+
 # test MSE
 mean((predy2.pcr-newy)^2) %>% sqrt()
 
@@ -152,9 +156,10 @@ pls.mod <- plsr(weekly_sales~.,
 
 summary(pls.mod)
 validationplot(pls.mod, val.type="MSEP", legendpos = "topright")
-
+selectNcomp(pls.mod, method = c("randomization"),
+            ncomp = pcr.mod$ncomp)
 predy2.pls <- predict(pls.mod, newdata = df_1percent[-train_ind,], 
-                      ncomp = 8)
+                      ncomp = 11)
 # test MSE
 mean((predy2.pls-newy)^2) %>% sqrt()
 
