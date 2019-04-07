@@ -17,6 +17,7 @@ df_useful = df[,c("weekly_sales","store","is_holiday","dept","temperature","fuel
 quantile(df$weekly_sales, seq(0,1,0.1)) 
 foo = quantile(df$weekly_sales, seq(0,1,0.1))
 
+# department ranked according to the average weekly sale
 df_1percent = sample_frac(df_useful,0.1)
 df_1percent =
   df_1percent %>%
@@ -66,7 +67,8 @@ newy =  test.data$weekly_sales
 # linear model 
 lm.fit <- lm(weekly_sales~., data = train.data)
 summary(lm.fit)
-mean((predict(lm.fit,newdata = test.data ) - newy)^2) %>% sqrt()
+
+mean((predict(lm.fit,newdata = test.data ) - newy)^2) %>% sqrt() # test
 
 #lasso using glmnet 
 set.seed(2)
@@ -200,3 +202,26 @@ mean((predy2.pcr-newy)^2) %>% sqrt()
 mean((predy2.pls-newy)^2) %>% sqrt()
 #gam
 mean((gam.pred-newy)^2) %>% sqrt()
+
+##### cross_validation for model selection 
+#lm 
+pred_tr_l = predict(lm.fit, newdata = train.data)
+mean((pred_tr_l - y)^2) %>% sqrt()
+# lasso
+pred_tr_lasso = predict(cv.lasso, newx  = x, s="lambda.min", type="response") 
+mean((pred_tr_lasso - y)^2) %>% sqrt()
+
+#ridge
+pred_tr_ridge = predict(cv.ridge, newx  = x, s="lambda.min", type="response") 
+mean((pred_tr_ridge - y)^2) %>% sqrt()
+#pcr
+pred_tr_pcr = predict(pcr.mod, newdata = train.data, ncomp = 51)
+mean((pred_tr_pcr - y)^2) %>% sqrt()
+#pls
+pred_tr_pls = predict(pls.mod, ewdata = train.data, ncomp = 8)
+mean((pred_tr_pls - y)^2) %>% sqrt()
+#gam
+pred_tr_gam2 = predict(gam.m2, newdata = train.data, type="response")
+mean((pred_tr_gam2 - y)^2)%>% sqrt()
+
+

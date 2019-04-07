@@ -215,3 +215,24 @@ mean((predy2.pls-newy)^2) %>% sqrt()
 #gam
 mean((gam.pred-newy)^2) %>% sqrt()
 
+##### cross_validation for model selection 
+#lm 
+pred_tr_l = predict(lm.fit, newdata = train.data)
+mean((pred_tr_l - y)^2) %>% sqrt()
+# lasso
+pred_tr_lasso = predict(cv.lasso, newx  = x, s="lambda.min", type="response") 
+mean((pred_tr_lasso - y)^2) %>% sqrt()
+
+#ridge
+pred_tr_ridge = predict(cv.ridge, newx  = x, s="lambda.min", type="response") 
+mean((pred_tr_ridge - y)^2) %>% sqrt()
+#pcr
+pred_tr_pcr = predict(pcr.mod, newdata = train.data, ncomp = 131)
+mean((pred_tr_pcr - y)^2) %>% sqrt()
+#pls
+pred_tr_pls = predict(pls.mod, ewdata = train.data, ncomp = 8)
+mean((pred_tr_pls - y)^2) %>% sqrt()
+#gam
+pred_tr_gam2 = predict(gam.m2, newdata = train.data, type="response")
+mean((pred_tr_gam2 - y)^2)%>% sqrt()
+
