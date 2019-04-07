@@ -68,20 +68,55 @@ newx =  model.matrix(weekly_sales~.,test.data)[,-1]
 newy =  test.data$weekly_sales
 
 
-
+library(leaps)
 # linear model 
 lm.fit <- lm(weekly_sales~., data = train.data)
 summary(lm.fit)
-mean((predict(lm.fit,newdata = test.data ) - newy)^2) %>% sqrt()
 
+lm.fit.2 <- lm(weekly_sales~.-fuel_price, data = train.data)
+summary(lm.fit.2)
+
+lm.fit.3 <- lm(weekly_sales~.-fuel_price,-unemployment, data = train.data)
+summary(lm.fit.3)
+
+
+AIC(lm.fit,lm.fit.2,lm.fit.3)
+
+mean((predict(lm.fit,newdata = test.data ) - newy)^2) %>% sqrt()
+mean((predict(lm.fit.2,newdata = test.data ) - newy)^2) %>% sqrt()
+mean((predict(lm.fit.3,newdata = test.data ) - newy)^2) %>% sqrt()
 par(mfrow = c(2, 2))
 plot(lm.fit)
 
 
 
+# Define training control
+set.seed(123) 
+train.control <- trainControl(method = "repeatedcv", 
+                              number = 10, repeats = 3)
+# Train the model
+model.1 <- train(weekly_sales ~., data = train.data, method = "lm",
+               trControl = train.control)
 
 
-dev.off()
+
+mean((predict(model,newdata = test.data ) - newy)^2) %>% sqrt()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #lasso using glmnet 
 set.seed(2)
 cv.lasso <- cv.glmnet(x, y,
