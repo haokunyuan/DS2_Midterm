@@ -276,3 +276,5 @@ mean((pred_tr_pls - y)^2) %>% sqrt()
 pred_tr_gam2 = predict(gam.m2, newdata = train.data, type="response")
 mean((pred_tr_gam2 - y)^2)%>% sqrt()
 
+
+

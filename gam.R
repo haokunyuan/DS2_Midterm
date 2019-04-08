@@ -161,6 +161,7 @@ AIC(gam.m1, gam.m2, gam.m3, gam.m4, gam.m5,gam.m6, gam.m7,gam.m8)
 anova(gam.m6, gam.m7,gam.m8, test = "F")
 
 
+
 #plot
 #gam.check(gam.m_6)
 par(mfrow=c(2,2))
@@ -187,3 +188,33 @@ mean((gam.pred-newy)^2) %>% sqrt()
 gam.pred = predict(gam.m8, newdata = test.data,type = "response")
 # test MSE
 mean((gam.pred-newy)^2) %>% sqrt()
+
+
+
+
+# gam caret 
+
+
+ctrl1 <- trainControl(method = "cv", number = 10)
+# you can try other options
+
+set.seed(2)
+gam.fit <- train(weekly_sales~.,
+                 data = train.data,
+                 method = "gam",
+                 tuneGrid = data.frame(method = "GCV.Cp", select = c(TRUE,FALSE)),
+                 trControl = ctrl1)
+
+gam.fit$bestTune
+
+gam.fit$finalModel
+
+predict(gam.fit,newdata = test.data)
+
+gam.pred = predict(gam.fit, newdata = test.data)
+# test MSE
+mean((gam.pred-newy)^2) %>% sqrt()
+
+
+resamples(gam=gam.fit)
+bwplot(resamples(list(gam = gam.fit,mars = gam.fit)), metric = "RMSE")
