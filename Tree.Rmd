@@ -1,0 +1,156 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+Conduct Tree methods to midterm project data 
+
+```{r}
+library(tidyverse)
+library(caret)
+library(rpart)
+library(rpart.plot)
+
+
+library(doParallel)
+cluster <- makePSOCKcluster(8)
+registerDoParallel(cluster)
+```
+
+```{r}
+merged_df = read_csv("data/merged_data_2.csv") %>% janitor::clean_names()
+df_useful = merged_df[,c("weekly_sales","store","is_holiday","dept","temperature","fuel_price","cpi","unemployment","type","size","week_of_year","year","month_of_year")]
+
+# df$weekly_sales %>% min()
+# df_useful$weekly_sales = log(df_useful$weekly_sales- min(df_useful$weekly_sales)+ 0.01) 
+# df_useful$weekly_sales %>% hist()
+# summary(df_useful$weekly_sales)
+
+#df_1percent = df_useful
+df_1percent = sample_frac(df_useful,0.01)
+# df_1percent$dept_rank %>% table()
+
+df_1percent$store = as.factor(df_1percent$store)
+df_1percent$type = as.factor(df_1percent$type)
+df_1percent$dept = as.factor(df_1percent$dept)
+# df_1percent$dept_rank = as.factor(df_1percent$dept_rank)
+# df_1percent = subset(df_1percent,select = -c(dept,dept_ave_sales))
+# done transform
+
+
+
+
+# seperate test and train 
+smp_size <- floor(0.75 * nrow(df_1percent))
+set.seed(123)
+train_ind <- sample(seq_len(nrow(df_1percent)), size = smp_size)
+
+train.data <- df_1percent[train_ind, ]
+test.data  <- df_1percent[-train_ind, ]
+
+x <- model.matrix(weekly_sales~.,train.data)[,-1]
+y <- train.data$weekly_sales
+
+newx =  model.matrix(weekly_sales~.,test.data)[,-1]
+newy =  test.data$weekly_sales
+
+
+# train_data
+ctrl1 <- trainControl(method = "repeatedcv", number = 10, repeats = 5)
+#----- 
+```
+
+# Regression tree
+```{r}
+# Use caret for model comparison 
+ctrl <- trainControl(method = "cv")
+set.seed(1)
+# Use CP from above pruned model, cp is complexity parameter
+rpart.fit <- train(weekly_sales~., df_1percent, 
+                   method = "rpart",
+                   tuneGrid = data.frame(cp = exp(seq(-10,0, length = 50))),
+                   trControl = ctrl)
+plot(rpart.fit, xTrans = function(x)log(x))
+
+```
+# Pruned tree
+```{r}
+rpart.fit.trim <- train(weekly_sales~., df_1percent, 
+                   method = "rpart",
+                   tuneGrid = data.frame(cp = exp(seq(-10,0, length = 50))),
+                   trControl = trainControl(
+                                method = "cv",
+                                selectionFunction = "oneSE"))
+plot(rpart.fit.trim, xTrans = function(x)log(x))
+```
+```{r}
+rpart.plot(rpart.fit.trim$finalModel)
+```
+# bagging 
+```{r}
+ctrl <- trainControl(method = "cv")
+set.seed(1)
+bg.fit <- train(weekly_sales ~ ., 
+                df_1percent,
+                method = "ranger",
+                tuneGrid = expand.grid(
+                          mtry = 12, 
+                          splitrule = "variance",
+                          min.node.size = 1 ),
+                importance = "permutation",
+                scale.permutation.importance = "TRUE",
+                trControl = ctrl
+              )
+
+# plot variable of importance 
+barplot(sort(ranger::importance(bg.fit$finalModel), decreasing = FALSE),
+        las = 2, horiz = TRUE, cex.names = 0.7)
+```
+```{r}
+ggplot(bg.fit, highlight = TRUE)
+```
+#randome forest 
+```{r}
+ctrl <- trainControl(method = "cv")
+rf.grid <- expand.grid(mtry = 1:12,
+                       splitrule = "variance",
+                       min.node.size = 1:4)
+set.seed(1)
+rf.fit <- train(weekly_sales~., df_1percent,
+                method = "ranger",
+                tuneGrid = rf.grid,
+                trControl = ctrl)
+
+#rf.fit$bestTune
+ggplot(rf.fit, highlight = TRUE)
+```
+# boosting 
+```{r}
+gbm.grid <- expand.grid(n.trees = c(1500,2200,900),
+                        interaction.depth = c(5,7,9,11,13),
+                        shrinkage = c(0.15,0.1,0.05),
+                        n.minobsinnode = 1)
+set.seed(1)
+gbm.fit <- train(weekly_sales~., df_1percent,
+                 method = "gbm",
+                 tuneGrid = gbm.grid,
+                 trControl = ctrl,
+                 verbose = FALSE)
+
+#ggplot(gbm.fit, highlight = TRUE)
+#varImp(gbm.fit) %>% plot()
+#summary(gbm.fit$finalModel)
+```
+
+
+#resample 
+```{r}
+resamp <- resamples(list(reg_tree = rpart.fit, 
+                         sm_reg_tree = rpart.fit.trim
+                         ,bagging = bg.fit
+                          ,rf = rf.fit
+                         ,gbm = gbm.fit
+                         ))
+summary(resamp)
+bwplot(resamp, metric = "RMSE")
+```
+
