@@ -1,6 +1,8 @@
 ---
 title: "R Notebook"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 Conduct Tree methods to midterm project data 
 
@@ -32,6 +34,8 @@ df_1percent = sample_frac(df_useful,0.01)
 df_1percent$store = as.factor(df_1percent$store)
 df_1percent$type = as.factor(df_1percent$type)
 df_1percent$dept = as.factor(df_1percent$dept)
+
+
 # df_1percent$dept_rank = as.factor(df_1percent$dept_rank)
 # df_1percent = subset(df_1percent,select = -c(dept,dept_ave_sales))
 # done transform
@@ -108,6 +112,7 @@ barplot(sort(ranger::importance(bg.fit$finalModel), decreasing = FALSE),
 ```{r}
 ggplot(bg.fit, highlight = TRUE)
 ```
+
 #randome forest 
 ```{r}
 ctrl <- trainControl(method = "cv")
@@ -127,8 +132,8 @@ ggplot(rf.fit, highlight = TRUE)
 ```{r}
 gbm.grid <- expand.grid(n.trees = c(1500,2200,900),
                         interaction.depth = c(5,7,9,11,13),
-                        shrinkage = c(0.15,0.1,0.05),
-                        n.minobsinnode = 1)
+                        shrinkage = c(0.03,0.05),
+                        n.minobsinnode = 10)
 set.seed(1)
 gbm.fit <- train(weekly_sales~., df_1percent,
                  method = "gbm",
@@ -136,7 +141,7 @@ gbm.fit <- train(weekly_sales~., df_1percent,
                  trControl = ctrl,
                  verbose = FALSE)
 
-#ggplot(gbm.fit, highlight = TRUE)
+ggplot(gbm.fit, highlight = TRUE)
 #varImp(gbm.fit) %>% plot()
 #summary(gbm.fit$finalModel)
 ```
@@ -150,7 +155,7 @@ resamp <- resamples(list(reg_tree = rpart.fit,
                           ,rf = rf.fit
                          ,gbm = gbm.fit
                          ))
-summary(resamp)
+#summary(resamp)
 bwplot(resamp, metric = "RMSE")
 ```
 
