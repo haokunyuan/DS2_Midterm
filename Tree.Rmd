@@ -12,8 +12,8 @@ library(caret)
 library(rpart)
 library(rpart.plot)
 
-
 library(doParallel)
+#detectCores()
 cluster <- makePSOCKcluster(8)
 registerDoParallel(cluster)
 ```
@@ -28,14 +28,20 @@ df_useful = merged_df[,c("weekly_sales","store","is_holiday","dept","temperature
 # summary(df_useful$weekly_sales)
 
 #df_1percent = df_useful
-df_1percent = sample_frac(df_useful,0.01)
+df_1percent = sample_frac(df_useful,0.1)
+test_1percent =  sample_frac(df_useful,0.1)
 # df_1percent$dept_rank %>% table()
 
+##------------------
 df_1percent$store = as.factor(df_1percent$store)
 df_1percent$type = as.factor(df_1percent$type)
 df_1percent$dept = as.factor(df_1percent$dept)
+##------------------
+test_1percent$store = as.factor(test_1percent$store)
+test_1percent$type = as.factor(test_1percent$type)
+test_1percent$dept = as.factor(test_1percent$dept)
 
-
+##-------
 # df_1percent$dept_rank = as.factor(df_1percent$dept_rank)
 # df_1percent = subset(df_1percent,select = -c(dept,dept_ave_sales))
 # done transform
@@ -71,7 +77,7 @@ set.seed(1)
 # Use CP from above pruned model, cp is complexity parameter
 rpart.fit <- train(weekly_sales~., df_1percent, 
                    method = "rpart",
-                   tuneGrid = data.frame(cp = exp(seq(-10,0, length = 50))),
+                   tuneGrid = data.frame(cp = exp(seq(-20,0, length = 50))),
                    trControl = ctrl)
 plot(rpart.fit, xTrans = function(x)log(x))
 
@@ -80,14 +86,14 @@ plot(rpart.fit, xTrans = function(x)log(x))
 ```{r}
 rpart.fit.trim <- train(weekly_sales~., df_1percent, 
                    method = "rpart",
-                   tuneGrid = data.frame(cp = exp(seq(-10,0, length = 50))),
+                   tuneGrid = data.frame(cp = exp(seq(-15,0, length = 50))),
                    trControl = trainControl(
                                 method = "cv",
                                 selectionFunction = "oneSE"))
 plot(rpart.fit.trim, xTrans = function(x)log(x))
 ```
 ```{r}
-rpart.plot(rpart.fit.trim$finalModel)
+#rpart.plot(rpart.fit.trim$finalModel)
 ```
 # bagging 
 ```{r}
@@ -97,9 +103,9 @@ bg.fit <- train(weekly_sales ~ .,
                 df_1percent,
                 method = "ranger",
                 tuneGrid = expand.grid(
-                          mtry = 12, 
+                          mtry = 134, 
                           splitrule = "variance",
-                          min.node.size = 1 ),
+                          min.node.size = 10 ),
                 importance = "permutation",
                 scale.permutation.importance = "TRUE",
                 trControl = ctrl
@@ -108,17 +114,17 @@ bg.fit <- train(weekly_sales ~ .,
 # plot variable of importance 
 barplot(sort(ranger::importance(bg.fit$finalModel), decreasing = FALSE),
         las = 2, horiz = TRUE, cex.names = 0.7)
-```
-```{r}
-ggplot(bg.fit, highlight = TRUE)
+# use when there is tuning 
+#ggplot(bg.fit, highlight = TRUE)
 ```
 
-#randome forest 
+
+#random forest 
 ```{r}
 ctrl <- trainControl(method = "cv")
-rf.grid <- expand.grid(mtry = 1:12,
+rf.grid <- expand.grid(mtry = seq(4,134,10),
                        splitrule = "variance",
-                       min.node.size = 1:4)
+                       min.node.size = 10)
 set.seed(1)
 rf.fit <- train(weekly_sales~., df_1percent,
                 method = "ranger",
@@ -130,10 +136,10 @@ ggplot(rf.fit, highlight = TRUE)
 ```
 # boosting 
 ```{r}
-gbm.grid <- expand.grid(n.trees = c(1500,2200,900),
-                        interaction.depth = c(5,7,9,11,13),
-                        shrinkage = c(0.03,0.05),
-                        n.minobsinnode = 10)
+gbm.grid <- expand.grid(n.trees = (4:18)*1000,
+                        interaction.depth = c(1,5,7),
+                        shrinkage = c(0.05,0.025,0.01),
+                        n.minobsinnode = c(100))
 set.seed(1)
 gbm.fit <- train(weekly_sales~., df_1percent,
                  method = "gbm",
@@ -144,7 +150,65 @@ gbm.fit <- train(weekly_sales~., df_1percent,
 ggplot(gbm.fit, highlight = TRUE)
 #varImp(gbm.fit) %>% plot()
 #summary(gbm.fit$finalModel)
+
 ```
+
+```{r}
+summary(gbm.fit$finalModel)
+```
+
+# crazy amout of tuing 
+```{r}
+gbm.grid.full <- expand.grid(n.trees = (10:30)*1000,
+                        interaction.depth = c(1,5,7,10),
+                        shrinkage = c(0.05,0.025,0.01,0.7,0.1),
+                        n.minobsinnode = c(100,1000,10000))
+set.seed(1)
+gbm.fit.full <- train(weekly_sales~., df_1percent,
+                 method = "gbm",
+                 tuneGrid = gbm.grid.full,
+                 trControl = ctrl,
+                 verbose = FALSE)
+
+ggplot(gbm.fit.full, highlight = TRUE)
+```
+
+# further sample 
+```{r}
+df_1per = sample_frac(df_1percent,0.1)
+```
+```{r}
+gbm.grid.small <- expand.grid(n.trees = (4:18)*1000,
+                        interaction.depth = c(1,5,7),
+                        shrinkage = c(0.05,0.025,0.01),
+                        n.minobsinnode = c(100))
+set.seed(1)
+gbm.fit.small <- train(weekly_sales~., df_1per,
+                 method = "gbm",
+                 tuneGrid = gbm.grid.small,
+                 trControl = ctrl,
+                 verbose = FALSE)
+
+ggplot(gbm.fit.small, highlight = TRUE)
+```
+
+# testing one tuning set
+```{r}
+#gbm.fit.small$bestTune
+gbm.grid.small <- expand.grid(n.trees = (20)*1000,
+                        interaction.depth = c(10),
+                        shrinkage = c(0.1),
+                        n.minobsinnode = c(100))
+set.seed(1)
+gbm.fit.a <- train(weekly_sales~., df_1percent,
+                 method = "gbm",
+                 tuneGrid = gbm.grid.small,
+                 trControl = ctrl,
+                 verbose = FALSE)
+gbm.fit.a
+```
+
+
 
 
 #resample 
@@ -157,5 +221,76 @@ resamp <- resamples(list(reg_tree = rpart.fit,
                          ))
 #summary(resamp)
 bwplot(resamp, metric = "RMSE")
+```
+
+# test set performance 
+
+```{r}
+# mean( (predict(rpart.fit, newdata = test_1percent) - test_1percent$weekly_sales)^2  ) %>% sqrt()
+
+
+                         
+rpart_pred = predict(rpart.fit, newdata = test_1percent)
+sm_reg_tree = predict(rpart.fit.trim, newdata = test_1percent)
+bagging = predict(bg.fit, newdata = test_1percent)
+rf = predict(rf.fit, newdata = test_1percent)
+gbm = predict(gbm.fit, newdata = test_1percent)
+
+
+postResample(pred = rpart_pred, obs = test_1percent$weekly_sales)
+postResample(pred = sm_reg_tree, obs = test_1percent$weekly_sales)
+postResample(pred = bagging, obs = test_1percent$weekly_sales)
+postResample(pred = rf, obs = test_1percent$weekly_sales)
+postResample(pred = gbm, obs = test_1percent$weekly_sales)
+```
+
+```{r}
+#lasso caret
+
+# set.seed(1)
+# lasso <- 
+#   train(
+#   x,y,
+#   method = "glmnet",
+#   trControl = trainControl(method = "cv", number = 10),
+#   tuneGrid = expand.grid(alpha = 1, lambda = exp(seq(-1000,100, length = 100)))
+# )
+# ggplot(lasso)
+#   
+# 
+# # Model coefficients
+# coef(lasso$finalModel, lasso$bestTune$lambda)
+# # Make predictions
+# predictions <- lasso %>% predict(test.data)
+# # Model prediction performance
+# data.frame(
+#   RMSE = RMSE(predictions, test.data$medv),
+#   Rsquare = R2(predictions, test.data$medv)
+# )
+gam_df = df_1percent
+gam_df$dept = as.factor(gam_df$dept)
+gam_df$store = as.factor(gam_df$store)
+gam_df$type = as.factor(gam_df$type)
+gam.m2 <- gam(weekly_sales ~ 
+                store+
+                is_holiday+
+                s(temperature)+
+                s(fuel_price)+
+                s(cpi)+
+                s(unemployment)+
+                type+
+                s(size)+
+                s(week_of_year)+
+                year+
+                s(month_of_year)+
+                dept, 
+              data = gam_df)
+summary(gam.m2)
+
+
+gam.pred = predict(gam.m2, newdata = test_1percent,type = "response")
+
+# test MSE
+mean((gam.pred-test_1percent$weekly_sales)^2) %>% sqrt()
 ```
 
