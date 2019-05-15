@@ -49,6 +49,7 @@ rpart.plot(rpart.fit$finalModel)
 
 
 tree1 = rpart(formula = weekly_sales~.,data = df)
+
 rpart.plot(tree1)
 
 ```
