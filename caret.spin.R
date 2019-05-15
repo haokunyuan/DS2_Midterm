@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+#Midterm Project
+>>>>>>> 76cf19bd09e5de14a9e38eab6bb954cfd6e2afb5
 library(caret)
 library(splines)
 library(mgcv)
@@ -17,10 +21,17 @@ dev.off()
 df = read_csv("data/merged_data_2.csv") %>% janitor::clean_names()
 df_useful = df[,c("weekly_sales","store","is_holiday","dept","temperature","fuel_price","cpi","unemployment","type","size","week_of_year","year","month_of_year")]
 
+<<<<<<< HEAD
 #df$weekly_sales %>% min()
 df_useful$weekly_sales = log(df_useful$weekly_sales- min(df_useful$weekly_sales)+ 0.01) 
 # df_useful$weekly_sales %>% hist()
 # summary(df_useful$weekly_sales)
+=======
+df$weekly_sales %>% min()
+df_useful$weekly_sales = log(df_useful$weekly_sales- min(df_useful$weekly_sales)+ 0.01) 
+df_useful$weekly_sales %>% hist()
+summary(df_useful$weekly_sales)
+>>>>>>> 76cf19bd09e5de14a9e38eab6bb954cfd6e2afb5
 
 
 
@@ -104,6 +115,7 @@ resamp <- resamples(list(lasso = lasso.fit, ridge = ridge.fit, lm = lm.fit))
 bwplot(resamp, metric = "RMSE")
 
 
+<<<<<<< HEAD
 # pcr
 # pcr_data = train.data
 # ind <- sapply(pcr_data, is.numeric)
@@ -120,6 +132,8 @@ bwplot(resamp, metric = "RMSE")
 # trans <- preProcess(x, method = c("center", "scale"))
 # predy2.pcr2 <- predict(pcr.fit$finalModel, newdata = predict(trans, test.data), 
 #                        ncomp = pcr.fit$bestTune[[1]])
+=======
+>>>>>>> 76cf19bd09e5de14a9e38eab6bb954cfd6e2afb5
 
 ## Principal components regression (PCR)
 
@@ -286,7 +300,11 @@ AIC(gam.1, gam.2, gam.3, gam.4, gam.5,gam.6, gam.7,gam.8)
 
 ###### Model seletion is based on the train MSE/RESAMPLING. GAM works well.
 
+<<<<<<< HEAD
 ##### MSE (train)
+=======
+##### RMSE (train)
+>>>>>>> 76cf19bd09e5de14a9e38eab6bb954cfd6e2afb5
 #lm 
 pred_tr_l = predict(lm.fit, newdata = train.data)
 mean((pred_tr_l - y)^2) %>% sqrt()
@@ -309,7 +327,11 @@ mean((pred_tr_gam2 - y)^2)%>% sqrt()
 
 
 ##### evaluate test performance
+<<<<<<< HEAD
 #####  MSE (train) 
+=======
+#####  RMSE (train) 
+>>>>>>> 76cf19bd09e5de14a9e38eab6bb954cfd6e2afb5
 #lm 
 pred_tr_l = predict(lm.fit, newdata = test.data)
 mean((pred_tr_l - newy)^2) %>% sqrt()

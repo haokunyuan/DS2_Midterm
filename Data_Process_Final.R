@@ -25,3 +25,6 @@ skimr::skim(store.1)
 # also markdown need to be droped due to large number 50% of missing value 
 store.1_short = subset(store.1, select = -c(MarkDown1,MarkDown2,MarkDown3,MarkDown4,MarkDown5,Type,Size,Store))
 skimr::skim(store.1_short)
+
+
+#write.csv(store.1_short,"data/final_data_one_store.csv")

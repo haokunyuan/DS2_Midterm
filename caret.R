@@ -1,3 +1,4 @@
+#Midterm Project
 library(caret)
 library(splines)
 library(mgcv)
@@ -104,22 +105,6 @@ resamp <- resamples(list(lasso = lasso.fit, ridge = ridge.fit, lm = lm.fit))
 bwplot(resamp, metric = "RMSE")
 
 
-# pcr
-# pcr_data = train.data
-# ind <- sapply(pcr_data, is.numeric)
-# pcr_data[ind] <- lapply(pcr_data[ind], scale)
-# 
-# set.seed(2)
-# pcr.fit <- train(weekly_sales~.,
-#                  data= pcr_data,
-#                  method = "pcr",
-#                  tuneLength = 18,
-#                  trControl = ctrl1)
-# 
-# # need to preprocess your data when using predict()
-# trans <- preProcess(x, method = c("center", "scale"))
-# predy2.pcr2 <- predict(pcr.fit$finalModel, newdata = predict(trans, test.data), 
-#                        ncomp = pcr.fit$bestTune[[1]])
 
 ## Principal components regression (PCR)
 
@@ -286,7 +271,7 @@ AIC(gam.1, gam.2, gam.3, gam.4, gam.5,gam.6, gam.7,gam.8)
 
 ###### Model seletion is based on the train MSE/RESAMPLING. GAM works well.
 
-##### MSE (train)
+##### RMSE (train)
 #lm 
 pred_tr_l = predict(lm.fit, newdata = train.data)
 mean((pred_tr_l - y)^2) %>% sqrt()
@@ -309,7 +294,7 @@ mean((pred_tr_gam2 - y)^2)%>% sqrt()
 
 
 ##### evaluate test performance
-#####  MSE (train) 
+#####  RMSE (train) 
 #lm 
 pred_tr_l = predict(lm.fit, newdata = test.data)
 mean((pred_tr_l - newy)^2) %>% sqrt()
