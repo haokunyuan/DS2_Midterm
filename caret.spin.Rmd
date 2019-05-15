@@ -1,3 +1,5 @@
+
+```{r }
 library(caret)
 library(splines)
 library(mgcv)
@@ -56,7 +58,8 @@ newy =  test.data$weekly_sales
 
 # train_data
 ctrl1 <- trainControl(method = "repeatedcv", number = 10, repeats = 5)
-#----- 
+```
+```{r }
 
 #linear model
 set.seed(2)
@@ -329,3 +332,11 @@ mean((pred_tr_pls - newy)^2) %>% sqrt()
 #gam
 pred_tr_gam2 = predict(gam.m6, newdata = test.data, type="response")
 mean((pred_tr_gam2 - newy)^2)%>% sqrt()
+```
+
+
+---
+title: "caret.R"
+author: "siyanchen"
+date: "Sun Apr  7 22:46:50 2019"
+---

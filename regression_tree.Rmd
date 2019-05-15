@@ -1,0 +1,55 @@
+---
+title: "sc4456_Unsupervised analysis"
+author: "Siyan Chen"
+date: "5/15/2019"
+output: pdf_document
+---
+
+```{r, include=FALSE}
+library(tidyverse)
+library(dplyr)
+library(caret)
+library(rpart)
+library(rpart.plot)
+
+```
+
+Data Cleaning
+
+```{r}
+df = read_csv("data/final_data_one_store.csv") %>% 
+  janitor::clean_names()
+df = df[-1:-2] %>% filter(dept == 1)
+
+df$dept = as.factor(df$dept)
+```
+
+
+# caret regression tree
+
+```{r}
+head(df)
+# train_data = createDataPartition(y = df$weekly_sales,
+#                                p = 0.75,
+#                                list = FALSE)
+
+ctrl <- trainControl(method = "cv")
+
+set.seed(1)
+# Use CP from above pruned model, cp is complexity parameter
+
+rpart.fit <- train(weekly_sales~., df,
+                   method = "rpart",
+                   tuneGrid = data.frame(cp = exp(seq(-5,1, length = 30))),
+                   trControl = ctrl)
+
+ggplot(rpart.fit, highlight = TRUE)
+                 
+rpart.plot(rpart.fit$finalModel)
+
+
+tree1 = rpart(formula = weekly_sales~.,data = df)
+rpart.plot(tree1)
+
+```
+
