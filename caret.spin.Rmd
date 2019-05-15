@@ -1,3 +1,6 @@
+
+```{r }
+#Midterm Project
 library(caret)
 library(splines)
 library(mgcv)
@@ -14,19 +17,18 @@ library(MASS)
 # base on their mean sales
 
 dev.off()
-df = read_csv("data/merged_data_2.csv") %>% 
-  janitor::clean_names()
+df = read_csv("data/merged_data_2.csv") %>% janitor::clean_names()
 df_useful = df[,c("weekly_sales","store","is_holiday","dept","temperature","fuel_price","cpi","unemployment","type","size","week_of_year","year","month_of_year")]
 
 df$weekly_sales %>% min()
-#df_useful$weekly_sales = log(df_useful$weekly_sales- min(df_useful$weekly_sales)+ 0.01) 
+df_useful$weekly_sales = log(df_useful$weekly_sales- min(df_useful$weekly_sales)+ 0.01) 
 df_useful$weekly_sales %>% hist()
 summary(df_useful$weekly_sales)
 
 
 
-#df_1percent = df_useful
-df_1percent = sample_frac(df_useful,0.01)
+df_1percent = df_useful
+ # sample_frac(df_useful,0.1)
 
 # df_1percent$dept_rank %>% table()
 
@@ -55,22 +57,24 @@ newx =  model.matrix(weekly_sales~.,test.data)[,-1]
 newy =  test.data$weekly_sales
 
 
-
+# train_data
 ctrl1 <- trainControl(method = "repeatedcv", number = 10, repeats = 5)
-#----- 
-#linear 
+```
+```{r }
+
+#linear model
 set.seed(2)
 lm.fit <- train(weekly_sales~.,
                 data= train.data,
                 method = "lm",
                 trControl = ctrl1)
-#ridge
+#ridge model
 set.seed(2)
 ridge.fit <- train(weekly_sales~.,
                    data= train.data,
                    method = "glmnet",
                    tuneGrid = expand.grid(alpha = 0, 
-                                          lambda = exp(seq(5, 10, length=100))),
+                                          lambda = exp(seq(-50, 10, length=100))),
                    # preProc = c("center", "scale"),
                    trControl = ctrl1)
 
@@ -81,14 +85,14 @@ ridge.fit$bestTune
 coef(ridge.fit$finalModel,ridge.fit$bestTune$lambda)
 
 
-# lasso 
+# lasso model
 
 set.seed(2)
 lasso.fit <- train(weekly_sales~.,
                    data= train.data,
                    method = "glmnet",
                    tuneGrid = expand.grid(alpha = 1, 
-                                          lambda = exp(seq(-10, 10, length=100))),
+                                          lambda = exp(seq(-50, 5, length=100))),
                    # preProc = c("center", "scale"),
                    trControl = ctrl1)
 plot(lasso.fit, xTrans = function(x) log(x))
@@ -97,48 +101,17 @@ lasso.fit$bestTune
 
 coef(lasso.fit$finalModel,lasso.fit$bestTune$lambda)
 
-
+# train data mse- compare lasso, ridge, lm 
 resamp <- resamples(list(lasso = lasso.fit, ridge = ridge.fit, lm = lm.fit))
 #summary(resamp)
 #parallelplot(resamp, metric = "RMSE")
 bwplot(resamp, metric = "RMSE")
 
 
-# pcr
-# pcr_data = train.data
-# ind <- sapply(pcr_data, is.numeric)
-# pcr_data[ind] <- lapply(pcr_data[ind], scale)
-# 
-set.seed(2)
-pcr.fit <- train(weekly_sales~.,
-                 data= train.data,
-                 method = "pcr",
-                 tuneLength = 18,
-                 trControl = ctrl1,
-                 preProc = c("center", "scale") )
- 
-# # need to preprocess your data when using predict()
-trans <- preProcess(x, method = c("center", "scale"))
-predy2.pcr2 <- predict(pcr.fit$finalModel, 
-                       newdata = predict(trans, test.data), 
-                       ncomp = pcr.fit$bestTune[[1]])
 
-ggplot(pcr.fit, highlight = TRUE)+ theme_bw()
-
-set.seed(2)
-pls.fit <-train(x, y,
-                method = "pls",
-                tuneLength = 18,
-                trControl = ctrl1,
-                scale = TRUE)
-
-predy2.pls2 <-predict(pls.fit$finalModel,
-                      newdata = test.data,
-                      ncomp = pls.fit$bestTune$ncomp)
-ggplot(pls.fit, highlight = TRUE)
 ## Principal components regression (PCR)
 
-#We fit the PCR model using the function `pcr()`.
+#PCR model- `pcr()`.
 set.seed(2)
 pcr.mod <- pcr(weekly_sales~., 
                data = df_1percent[train_ind,],
@@ -165,9 +138,7 @@ mean((predy2.pcr-newy)^2) %>% sqrt()
 
 
 
-## Partial least squares (PLS)
-
-#We fit the PLS model using the function `plsr()`.
+## Partial least squares (PLS)- `plsr()`.
 
 set.seed(2)
 pls.mod <- plsr(weekly_sales~., 
@@ -187,20 +158,20 @@ mean((predy2.pls-newy)^2) %>% sqrt()
 
 
 
-gam
+# gam fit
 gam.fit <- train(weekly_sales~.,
                  data = train.data,
                  method = "gam",
                  tuneGrid = data.frame(method = "GCV.Cp", select = FALSE),
                  trControl = ctrl1)
 
-# GAM
-gam.m1 <- gam(weekly_sales ~store+is_holiday+temperature+
+# GAM (anova)
+gam.1 <- gam(weekly_sales ~store+is_holiday+temperature+
                 fuel_price+cpi+unemployment+type+size+
                 week_of_year+year+month_of_year+dept,
               data = train.data)
 
-gam.m2 <- gam(weekly_sales ~
+gam.2 <- gam(weekly_sales ~
                 store+
                 is_holiday+
                 s(temperature)+
@@ -214,7 +185,7 @@ gam.m2 <- gam(weekly_sales ~
                 month_of_year+
                 dept,
               data = train.data)
-gam.m3 <- gam(weekly_sales ~
+gam.3 <- gam(weekly_sales ~
                 store+
                 is_holiday+
                 s(temperature)+
@@ -228,7 +199,7 @@ gam.m3 <- gam(weekly_sales ~
                 month_of_year+
                 dept,
               data = train.data)
-gam.m4 <- gam(weekly_sales ~
+gam.4 <- gam(weekly_sales ~
                 store+
                 is_holiday+
                 s(temperature)+
@@ -242,7 +213,7 @@ gam.m4 <- gam(weekly_sales ~
                 month_of_year+
                 dept,
               data = train.data)
-gam.m5 <- gam(weekly_sales ~
+gam.5 <- gam(weekly_sales ~
                 store+
                 is_holiday+
                 s(temperature)+
@@ -256,7 +227,7 @@ gam.m5 <- gam(weekly_sales ~
                 month_of_year+
                 dept,
               data = train.data)
-gam.m6 <- gam(weekly_sales ~ 
+gam.6 <- gam(weekly_sales ~ 
                 store+
                 is_holiday+
                 s(temperature)+
@@ -270,7 +241,7 @@ gam.m6 <- gam(weekly_sales ~
                 s(month_of_year)+
                 dept, 
               data = train.data)
-gam.m7 <- gam(weekly_sales ~
+gam.7 <- gam(weekly_sales ~
                 store+
                 is_holiday+
                 s(temperature)+
@@ -284,7 +255,7 @@ gam.m7 <- gam(weekly_sales ~
                 dept,
               data = train.data)
 
-gam.m8 <- gam(weekly_sales ~
+gam.8 <- gam(weekly_sales ~
                 store+
                 is_holiday+
                 s(cpi)+
@@ -298,11 +269,12 @@ gam.m8 <- gam(weekly_sales ~
 
 
 
-anova(gam.m1, gam.m2, gam.m3, gam.m4, gam.m5,gam.m6,gam.m8, gam.m7, test = "F")
-AIC(gam.m1, gam.m2, gam.m3, gam.m4, gam.m5,gam.m6, gam.m7,gam.m8)
+anova(gam.1, gam.2, gam.3, gam.4, gam.5,gam.6,gam.8, gam.7, test = "F")
+AIC(gam.1, gam.2, gam.3, gam.4, gam.5,gam.6, gam.7,gam.8)
 
+###### Model seletion is based on the train MSE/RESAMPLING. GAM works well.
 
-##### compare 
+##### RMSE (train)
 #lm 
 pred_tr_l = predict(lm.fit, newdata = train.data)
 mean((pred_tr_l - y)^2) %>% sqrt()
@@ -324,8 +296,8 @@ pred_tr_gam2 = predict(gam.m6, newdata = train.data, type="response")
 mean((pred_tr_gam2 - y)^2)%>% sqrt()
 
 
-
-##### compare 
+##### evaluate test performance
+#####  RMSE (train) 
 #lm 
 pred_tr_l = predict(lm.fit, newdata = test.data)
 mean((pred_tr_l - newy)^2) %>% sqrt()
@@ -345,3 +317,11 @@ mean((pred_tr_pls - newy)^2) %>% sqrt()
 #gam
 pred_tr_gam2 = predict(gam.m6, newdata = test.data, type="response")
 mean((pred_tr_gam2 - newy)^2)%>% sqrt()
+```
+
+
+---
+title: "caret.R"
+author: "lucyyuan"
+date: "2019-04-07"
+---
