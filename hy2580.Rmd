@@ -19,36 +19,25 @@ library(MASS)
 
 Data Cleaning
 ```{r}
-df = read_csv("data/merged_data_2.csv") %>% 
+df = read_csv("data/final_data_one_store.csv") %>% 
   janitor::clean_names()
-df_useful = df[,c("weekly_sales","store","is_holiday","dept","temperature","fuel_price","cpi","unemployment","type","size","week_of_year","year","month_of_year")]
+df = df[-1:-2]
 
-df$weekly_sales %>% min()
-df_useful$weekly_sales %>% hist()
-summary(df_useful$weekly_sales)
-
-#df_1percent = df_useful
-df_1percent = sample_frac(df_useful,0.1)
-
-# df_1percent$dept_rank %>% table()
-
-df_1percent$store = as.factor(df_1percent$store)
-df_1percent$type = as.factor(df_1percent$type)
-df_1percent$dept = as.factor(df_1percent$dept)
-# df_1percent$dept_rank = as.factor(df_1percent$dept_rank)
-# df_1percent = subset(df_1percent,select = -c(dept,dept_ave_sales))
+df$dept = as.factor(df$dept)
+# df$dept_rank = as.factor(df$dept_rank)
+# df = subset(df,select = -c(dept,dept_ave_sales))
 # done transform
 ```
 
 test and train
 ```{r}
 # seperate test and train 
-smp_size <- floor(0.75 * nrow(df_1percent))
+smp_size <- floor(0.75 * nrow(df))
 set.seed(123)
-train_ind <- sample(seq_len(nrow(df_1percent)), size = smp_size)
+train_ind <- sample(seq_len(nrow(df)), size = smp_size)
 
-train.data <- df_1percent[train_ind, ]
-test.data  <- df_1percent[-train_ind, ]
+train.data <- df[train_ind, ]
+test.data  <- df[-train_ind, ]
 
 x <- model.matrix(weekly_sales~.,train.data)[,-1]
 y <- train.data$weekly_sales
@@ -104,7 +93,7 @@ set.seed(2)
 pcr.fit <- train(weekly_sales~.,
                  data= train.data,
                  method = "pcr",
-                 tuneLength = 18,
+                 tuneLength = 83,
                  trControl = ctrl1,
                  preProc = c("center", "scale") )
 # # need to preprocess your data when using predict()
@@ -197,8 +186,7 @@ resamp <- resamples(list(lasso = lasso.fit,
                          ridge = ridge.fit, 
                          lm = lm.fit,
                          pcr = pcr.fit,
-                         pls = pls.fit,
-                         gam = gam.m8))
+                         pls = pls.fit))
 
 bwplot(resamp, metric = "RMSE")
 ```
