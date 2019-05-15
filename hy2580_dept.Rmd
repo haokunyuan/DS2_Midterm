@@ -1,4 +1,15 @@
 ---
+title: "hy2580_dept"
+author: "haokun yuan"
+date: "5/15/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
 title: "Untitled"
 author: "haokun yuan"
 date: "5/14/2019"
@@ -19,16 +30,13 @@ library(MASS)
 
 Data Cleaning
 ```{r}
-df = read_csv("data/final_data_one_store.csv") %>% 
-  janitor::clean_names()
-df = df[-1:-2]
+df = read_csv("data/merged_data_2.csv") %>%
+  janitor::clean_names() %>% 
+  filter(dept == 3) %>% 
+  dplyr::select(is_holiday,weekly_sales,cpi,unemployment,size,type,temperature, fuel_price)
 
-df$dept = as.factor(df$dept)
-# df$dept_rank = as.factor(df$dept_rank)
-# df = subset(df,select = -c(dept,dept_ave_sales))
-# done transform
-df$weekly_sales %>% hist()
-
+df$is_holiday=as.factor(df$is_holiday)
+df$type = as.factor((df$type))
 ```
 
 test and train
@@ -69,7 +77,7 @@ ridge.fit <- train(weekly_sales~.,
                    data= train.data,
                    method = "glmnet",
                    tuneGrid = expand.grid(alpha = 0, 
-                                          lambda = exp(seq(5, 10, length=100))),
+                                          lambda = exp(seq(6.246, 6.255, length=100))),
                    # preProc = c("center", "scale"),
                    trControl = ctrl1)
 
@@ -83,7 +91,7 @@ lasso.fit <- train(weekly_sales~.,
                    data= train.data,
                    method = "glmnet",
                    tuneGrid = expand.grid(alpha = 1, 
-                                          lambda = exp(seq(-10, 10, length=100))),
+                                          lambda = exp(seq(2, 3, length=100))),
                    # preProc = c("center", "scale"),
                    trControl = ctrl1)
 plot(lasso.fit, xTrans = function(x) log(x))
@@ -95,7 +103,7 @@ set.seed(2)
 pcr.fit <- train(weekly_sales~.,
                  data= train.data,
                  method = "pcr",
-                 tuneLength = 83,
+                 tuneLength = 7,
                  trControl = ctrl1,
                  preProc = c("center", "scale") )
 # # need to preprocess your data when using predict()
