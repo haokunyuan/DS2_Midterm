@@ -1,0 +1,74 @@
+---
+title: "final_boosting"
+author: "Shu Deng"
+date: "5/15/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(caret) 
+library(gbm)
+library(doParallel)
+#detectCores()
+cluster <- makePSOCKcluster(16)
+registerDoParallel(cluster)
+```
+
+Data Cleaning
+```{r}
+df = read_csv("data/merged_data_2.csv") %>%
+  janitor::clean_names() %>% 
+  filter(dept == 3) %>% 
+  dplyr::select(is_holiday,weekly_sales,cpi,unemployment,size,type,temperature, fuel_price)
+
+df$is_holiday=as.factor(df$is_holiday)
+df$type = as.factor((df$type))
+
+# seperate test and train 
+smp_size <- floor(0.75 * nrow(df))
+set.seed(123)
+train_ind <- sample(seq_len(nrow(df)), size = smp_size)
+
+train.data <- df[train_ind, ]
+test.data  <- df[-train_ind, ]
+
+x <- model.matrix(weekly_sales~.,train.data)[,-1]
+y <- train.data$weekly_sales
+
+newx =  model.matrix(weekly_sales~.,test.data)[,-1]
+newy =  test.data$weekly_sales
+
+```
+caret control
+
+```{r}
+ctrl1 <- trainControl(method = "repeatedcv", number = 10, repeats = 2)
+```
+
+
+# Boosting
+```{r}
+gbm.grid <- expand.grid(n.trees = (1:10)*10000,
+                        interaction.depth = c(1,5,7),
+                        shrinkage = c(0.05,0.025,0.01),
+                        n.minobsinnode = c(100))
+set.seed(1)
+gbm.fit <- train(weekly_sales~., train.data,
+                 method = "gbm",
+                 tuneGrid = gbm.grid,
+                 trControl = trainControl(method="cv"),
+                 verbose = FALSE)
+
+ggplot(gbm.fit, highlight = TRUE)
+#varImp(gbm.fit) %>% plot()
+#summary(gbm.fit$finalModel)
+gbm.fit$bestTune  # 70000, 7, 0.01, 100
+
+```
+
+```{r}
+summary(gbm.fit$finalModel)
+```
+
