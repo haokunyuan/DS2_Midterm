@@ -7,7 +7,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(caret)
-library(doParallel)
+#library(doParallel)
 library(rpart)
 library(rpart.plot)
 cl <- makePSOCKcluster(16)
@@ -202,10 +202,10 @@ gam.fit1 <-train(train_matrix_x,
 ```{r}
 # Use CP from above pruned model, cp is complexity parameter
 set.seed(1)
-rpart.fit <- train(weekly_sales~., df,
+rpart.fit <- train(weekly_sales~., dept1_data,
                    method = "rpart",
                    tuneGrid = data.frame(cp = exp(seq(-5,2, length = 100))),
-                   trControl = ctrl)
+                   trControl = ctrl1)
 
 ggplot(rpart.fit, highlight = TRUE)
                  
