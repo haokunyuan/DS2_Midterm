@@ -7,7 +7,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(caret)
-#library(doParallel)
+library(doParallel)
 library(rpart)
 library(rpart.plot)
 cl <- makePSOCKcluster(16)
@@ -197,21 +197,22 @@ gam.fit1 <-train(train_matrix_x,
 ```
 
 
-# purne regression tree by lowest cross-validation errot
+#  regression tree and purne by lowest cross-validation errot
 
 ```{r}
+ctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 5,verboseIter = TRUE)
 # Use CP from above pruned model, cp is complexity parameter
 set.seed(1)
 rpart.fit <- train(weekly_sales~., dept1_data,
                    method = "rpart",
                    tuneGrid = data.frame(cp = exp(seq(-5,2, length = 100))),
-                   trControl = ctrl1)
+                   trControl = ctrl)
 
 ggplot(rpart.fit, highlight = TRUE)
                  
 rpart.plot(rpart.fit$finalModel)
 # rmse 
-predicted_value = predict(rpart.fit, newdata = df[rowTrain,])
+predicted_value = predict(rpart.fit, newdata = dept1_data[train.data,])
 rmse = sqrt(mean((df$weekly_sales-predicted_value)^2))
                           
 ```
@@ -219,9 +220,7 @@ rmse = sqrt(mean((df$weekly_sales-predicted_value)^2))
 # Tree Based model 
 bagging 
 ```{r}
-ctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 5,verboseIter = TRUE)
 set.seed(1)
-
 bg.fit <- train(weekly_sales ~ ., 
                 train.data,
                 method = "ranger",
@@ -253,6 +252,7 @@ rf.fit <- train(weekly_sales~., train.data,
 #rf.fit$bestTune
 ggplot(rf.fit, highlight = TRUE)
 ```
+
 ```{r}
 barplot(sort(ranger::importance(rf.fit$finalModel), decreasing = FALSE),
         las = 2, horiz = TRUE, cex.names = 0.7)
