@@ -8,6 +8,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(caret)
 library(doParallel)
+library(rpart)
+library(rpart.plot)
 cl <- makePSOCKcluster(16)
 registerDoParallel(cl)
 ```
@@ -192,6 +194,26 @@ gam.fit1 <-train(train_matrix_x,
                 tuneGrid = data.frame(method = "GCV.Cp",
                                       select = c(TRUE,FALSE)),
                 trControl = ctrl1)
+```
+
+
+# purne regression tree by lowest cross-validation errot
+
+```{r}
+# Use CP from above pruned model, cp is complexity parameter
+set.seed(1)
+rpart.fit <- train(weekly_sales~., df,
+                   method = "rpart",
+                   tuneGrid = data.frame(cp = exp(seq(-5,2, length = 100))),
+                   trControl = ctrl)
+
+ggplot(rpart.fit, highlight = TRUE)
+                 
+rpart.plot(rpart.fit$finalModel)
+# rmse 
+predicted_value = predict(rpart.fit, newdata = df[rowTrain,])
+rmse = sqrt(mean((df$weekly_sales-predicted_value)^2))
+                          
 ```
 
 # Tree Based model 
