@@ -1,0 +1,528 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={final all model},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\providecommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{final all model}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+    \author{}
+    \preauthor{}\postauthor{}
+    \date{}
+    \predate{}\postdate{}
+  
+
+\begin{document}
+\maketitle
+
+\hypertarget{exploratory-analysis}{%
+\section{Exploratory analysis}\label{exploratory-analysis}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# read and process data}
+\NormalTok{dept1_data =}\StringTok{ }\KeywordTok{read_csv}\NormalTok{(}\StringTok{"../data/final_data_one_department.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\NormalTok{janitor}\OperatorTok{::}\KeywordTok{clean_names}\NormalTok{()}
+\KeywordTok{head}\NormalTok{(dept1_data)}
+\CommentTok{# remove index }
+\NormalTok{dept1_data =}\StringTok{ }\NormalTok{dept1_data[}\OperatorTok{-}\DecValTok{1}\NormalTok{]}
+\CommentTok{# data type changed. }
+\NormalTok{dept1_data}\OperatorTok{$}\NormalTok{is_holiday =}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(dept1_data}\OperatorTok{$}\NormalTok{is_holiday)}
+\NormalTok{dept1_data}\OperatorTok{$}\NormalTok{type =}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(dept1_data}\OperatorTok{$}\NormalTok{type)}
+\NormalTok{dept1_data}\OperatorTok{$}\NormalTok{store =}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(dept1_data}\OperatorTok{$}\NormalTok{store)}
+\CommentTok{#skimr::skim(dept1_data)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# create a data frame for plot only }
+\NormalTok{dept1_data_plot =}\StringTok{ }\NormalTok{dept1_data}
+\NormalTok{dept1_data_plot}\OperatorTok{$}\NormalTok{is_holiday =}\StringTok{ }\KeywordTok{as.numeric}\NormalTok{(dept1_data_plot}\OperatorTok{$}\NormalTok{is_holiday)}
+\NormalTok{dept1_data_plot}\OperatorTok{$}\NormalTok{type =}\StringTok{ }\KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{as.factor}\NormalTok{(dept1_data_plot}\OperatorTok{$}\NormalTok{type))}
+\NormalTok{dept1_data_plot}\OperatorTok{$}\NormalTok{store =}\StringTok{ }\KeywordTok{as.numeric}\NormalTok{(dept1_data_plot}\OperatorTok{$}\NormalTok{store)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{distribtuion-of-response-and-corrlation}{%
+\section{distribtuion of response and
+corrlation}\label{distribtuion-of-response-and-corrlation}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# figure 1 distribution of response }
+\NormalTok{dept1_data }\OperatorTok{%>%}\StringTok{ }
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{() }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_histogram}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ weekly_sales))}\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme_minimal}\NormalTok{()}\OperatorTok{+}
+\StringTok{  }\KeywordTok{ggtitle}\NormalTok{(}\StringTok{"Distribution of Weekly Sales"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# set theme }
+\NormalTok{theme1 <-}\StringTok{ }\KeywordTok{trellis.par.get}\NormalTok{()}
+\NormalTok{theme1}\OperatorTok{$}\NormalTok{plot.symbol}\OperatorTok{$}\NormalTok{col <-}\StringTok{ }\KeywordTok{rgb}\NormalTok{(.}\DecValTok{2}\NormalTok{, }\FloatTok{.4}\NormalTok{, }\FloatTok{.2}\NormalTok{, }\FloatTok{.5}\NormalTok{)}
+\NormalTok{theme1}\OperatorTok{$}\NormalTok{plot.symbol}\OperatorTok{$}\NormalTok{pch <-}\StringTok{ }\DecValTok{16}
+\NormalTok{theme1}\OperatorTok{$}\NormalTok{plot.line}\OperatorTok{$}\NormalTok{col <-}\StringTok{ }\KeywordTok{rgb}\NormalTok{(.}\DecValTok{8}\NormalTok{, }\FloatTok{.1}\NormalTok{, }\FloatTok{.1}\NormalTok{, }\DecValTok{1}\NormalTok{)}
+\NormalTok{theme1}\OperatorTok{$}\NormalTok{plot.line}\OperatorTok{$}\NormalTok{lwd <-}\StringTok{ }\DecValTok{2}
+\NormalTok{theme1}\OperatorTok{$}\NormalTok{strip.background}\OperatorTok{$}\NormalTok{col <-}\StringTok{ }\KeywordTok{rgb}\NormalTok{(.}\DecValTok{0}\NormalTok{, }\FloatTok{.2}\NormalTok{, }\FloatTok{.6}\NormalTok{, }\FloatTok{.2}\NormalTok{)}
+\KeywordTok{trellis.par.set}\NormalTok{(theme1)}
+
+\KeywordTok{featurePlot}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ dept1_data_plot[,}\KeywordTok{c}\NormalTok{(}\OperatorTok{-}\DecValTok{3}\NormalTok{)],}
+            \DataTypeTok{y =}\NormalTok{ dept1_data}\OperatorTok{$}\NormalTok{weekly_sales,}
+            \DataTypeTok{span =} \FloatTok{.5}\NormalTok{, }
+            \DataTypeTok{plot =} \StringTok{"scatter"}\NormalTok{,}
+            \DataTypeTok{type =} \KeywordTok{c}\NormalTok{(}\StringTok{"p"}\NormalTok{,}\StringTok{"smooth"}\NormalTok{),}
+            \DataTypeTok{layout=} \KeywordTok{c}\NormalTok{(}\DecValTok{4}\NormalTok{,}\DecValTok{3}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{plot_x =}\StringTok{ }\KeywordTok{as.matrix}\NormalTok{(dept1_data_plot)}
+\NormalTok{corrplot}\OperatorTok{::}\KeywordTok{corrplot}\NormalTok{(}\KeywordTok{cor}\NormalTok{(plot_x))}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{test-and-train-split}{%
+\section{test and train split}\label{test-and-train-split}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# seperate test and train }
+\NormalTok{smp_size <-}\StringTok{ }\KeywordTok{floor}\NormalTok{(}\FloatTok{0.75} \OperatorTok{*}\StringTok{ }\KeywordTok{nrow}\NormalTok{(dept1_data))}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)}
+\NormalTok{train_ind <-}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\KeywordTok{seq_len}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(dept1_data)), }\DataTypeTok{size =}\NormalTok{ smp_size)}
+
+\NormalTok{train.data <-dept1_data[train_ind, ]}
+\NormalTok{test.data  <-}\StringTok{ }\NormalTok{dept1_data[}\OperatorTok{-}\NormalTok{train_ind, ]}
+
+\NormalTok{train_matrix_x <-}\StringTok{ }\KeywordTok{model.matrix}\NormalTok{(weekly_sales}\OperatorTok{~}\NormalTok{.,train.data)[,}\OperatorTok{-}\DecValTok{1}\NormalTok{]}
+\NormalTok{train_matrix_y <-}\StringTok{ }\NormalTok{train.data}\OperatorTok{$}\NormalTok{weekly_sales}
+
+\NormalTok{test_matrix_x =}\StringTok{  }\KeywordTok{model.matrix}\NormalTok{(weekly_sales}\OperatorTok{~}\NormalTok{.,test.data)[,}\OperatorTok{-}\DecValTok{1}\NormalTok{]}
+\NormalTok{test_matrix_y =}\StringTok{  }\NormalTok{test.data}\OperatorTok{$}\NormalTok{weekly_sales}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{linear-non-linear-models}{%
+\section{linear \& non-linear models}\label{linear-non-linear-models}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ctrl1 <-}\StringTok{ }\KeywordTok{trainControl}\NormalTok{(}\DataTypeTok{method =} \StringTok{"repeatedcv"}\NormalTok{, }\DataTypeTok{number =} \DecValTok{10}\NormalTok{, }\DataTypeTok{repeats =} \DecValTok{5}\NormalTok{)}
+\CommentTok{#linear }
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{2}\NormalTok{)}
+\NormalTok{lm.fit <-}\StringTok{ }\KeywordTok{train}\NormalTok{(weekly_sales}\OperatorTok{~}\NormalTok{.,}
+                \DataTypeTok{data=}\NormalTok{ train.data,}
+                \DataTypeTok{method =} \StringTok{"lm"}\NormalTok{,}
+                \DataTypeTok{trControl =}\NormalTok{ ctrl1)}
+\end{Highlighting}
+\end{Shaded}
+
+Ridge
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#ridge}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{2}\NormalTok{)}
+\NormalTok{ridge.fit <-}\StringTok{ }\KeywordTok{train}\NormalTok{(weekly_sales}\OperatorTok{~}\NormalTok{.,}
+                   \DataTypeTok{data=}\NormalTok{ train.data,}
+                   \DataTypeTok{method =} \StringTok{"glmnet"}\NormalTok{,}
+                   \DataTypeTok{tuneGrid =} \KeywordTok{expand.grid}\NormalTok{(}\DataTypeTok{alpha =} \DecValTok{0}\NormalTok{, }
+                                          \DataTypeTok{lambda =} \KeywordTok{exp}\NormalTok{(}\KeywordTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{20}\NormalTok{, }\DataTypeTok{length=}\DecValTok{50}\NormalTok{))),}
+                   \CommentTok{# preProc = c("center", "scale"),}
+                   \DataTypeTok{trControl =}\NormalTok{ ctrl1)}
+
+\KeywordTok{plot}\NormalTok{(ridge.fit, }\DataTypeTok{xTrans =} \ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{log}\NormalTok{(x))}
+\end{Highlighting}
+\end{Shaded}
+
+LASSO
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{2}\NormalTok{)}
+\NormalTok{lasso.fit <-}\StringTok{ }\KeywordTok{train}\NormalTok{(weekly_sales}\OperatorTok{~}\NormalTok{.,}
+                   \DataTypeTok{data=}\NormalTok{ train.data,}
+                   \DataTypeTok{method =} \StringTok{"glmnet"}\NormalTok{,}
+                   \DataTypeTok{tuneGrid =} \KeywordTok{expand.grid}\NormalTok{(}\DataTypeTok{alpha =} \DecValTok{1}\NormalTok{, }
+                                          \DataTypeTok{lambda =} \KeywordTok{exp}\NormalTok{(}\KeywordTok{seq}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{10}\NormalTok{, }\DataTypeTok{length=}\DecValTok{100}\NormalTok{))),}
+                   \CommentTok{# preProc = c("center", "scale"),}
+                   \DataTypeTok{trControl =}\NormalTok{ ctrl1)}
+\KeywordTok{plot}\NormalTok{(lasso.fit, }\DataTypeTok{xTrans =} \ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{log}\NormalTok{(x))}
+\end{Highlighting}
+\end{Shaded}
+
+Elastic net
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{2}\NormalTok{)}
+\NormalTok{enet.fit <-}\StringTok{ }\KeywordTok{train}\NormalTok{(weekly_sales}\OperatorTok{~}\NormalTok{.,}
+                   \DataTypeTok{data=}\NormalTok{ train.data,}
+                   \DataTypeTok{method =} \StringTok{"glmnet"}\NormalTok{,}
+                   \DataTypeTok{tuneGrid =} \KeywordTok{expand.grid}\NormalTok{(}\DataTypeTok{alpha =} \KeywordTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{,}\FloatTok{0.1}\NormalTok{), }
+                                          \DataTypeTok{lambda =} \KeywordTok{exp}\NormalTok{(}\KeywordTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{15}\NormalTok{, }\DataTypeTok{length=}\DecValTok{100}\NormalTok{))),}
+                   \CommentTok{# preProc = c("center", "scale"),}
+                   \DataTypeTok{trControl =}\NormalTok{ ctrl1)}
+\KeywordTok{plot}\NormalTok{(enet.fit, }\DataTypeTok{xTrans =} \ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{log}\NormalTok{(x))}
+\end{Highlighting}
+\end{Shaded}
+
+PCR
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{2}\NormalTok{)}
+\NormalTok{pcr.fit <-}\StringTok{ }\KeywordTok{train}\NormalTok{(weekly_sales}\OperatorTok{~}\NormalTok{.,}
+                 \DataTypeTok{data=}\NormalTok{ train.data,}
+                 \DataTypeTok{method =} \StringTok{"pcr"}\NormalTok{,}
+                 \DataTypeTok{tuneLength =} \DecValTok{80}\NormalTok{,}
+                 \DataTypeTok{trControl =}\NormalTok{ ctrl1,}
+                 \DataTypeTok{preProc =} \KeywordTok{c}\NormalTok{(}\StringTok{"center"}\NormalTok{, }\StringTok{"scale"}\NormalTok{) )}
+\CommentTok{# # need to preprocess your data when using predict()}
+\CommentTok{#trans <- preProcess(x, method = c("center", "scale"))}
+\CommentTok{# predy2.pcr2 <- predict(pcr.fit$finalModel, }
+\CommentTok{#                        newdata = predict(trans,test.data),}
+\CommentTok{#                        ncomp = pcr.fit$bestTune[[1]])}
+\KeywordTok{ggplot}\NormalTok{(pcr.fit, }\DataTypeTok{highlight =} \OtherTok{TRUE}\NormalTok{)}\OperatorTok{+}\StringTok{ }\KeywordTok{theme_bw}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+PLS
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{2}\NormalTok{)}
+\NormalTok{pls.fit <-}\KeywordTok{train}\NormalTok{(weekly_sales}\OperatorTok{~}\NormalTok{.,}
+                \DataTypeTok{data=}\NormalTok{ train.data,}
+                \DataTypeTok{method =} \StringTok{"pls"}\NormalTok{,}
+                \DataTypeTok{tuneLength =}\DecValTok{55}\NormalTok{,}
+                \DataTypeTok{trControl =}\NormalTok{ ctrl1,}
+                \DataTypeTok{scale =} \OtherTok{TRUE}\NormalTok{)}
+
+\CommentTok{# predy2.pls2 <-predict(pls.fit$finalModel,}
+\CommentTok{#                       newdata = test.data,}
+\CommentTok{#                       ncomp = pls.fit$bestTune$ncomp)}
+\KeywordTok{ggplot}\NormalTok{(pls.fit, }\DataTypeTok{highlight =} \OtherTok{TRUE}\NormalTok{)}\OperatorTok{+}\StringTok{ }\KeywordTok{theme_bw}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+gam
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{2}\NormalTok{)}
+\NormalTok{gam.fit <-}\KeywordTok{train}\NormalTok{(weekly_sales}\OperatorTok{~}\NormalTok{.,}
+                \DataTypeTok{data=}\NormalTok{ train.data,}
+                \DataTypeTok{method =} \StringTok{"gam"}\NormalTok{,}
+                \DataTypeTok{tuneGrid =} \KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{method =} \StringTok{"GCV.Cp"}\NormalTok{,}
+                                      \DataTypeTok{select =} \KeywordTok{c}\NormalTok{(}\OtherTok{TRUE}\NormalTok{,}\OtherTok{FALSE}\NormalTok{)),}
+                \DataTypeTok{trControl =}\NormalTok{ ctrl1)}
+
+\NormalTok{gam.fit}\OperatorTok{$}\NormalTok{finalModel}
+\KeywordTok{ggplot}\NormalTok{(gam.fit)}\OperatorTok{+}\StringTok{ }\KeywordTok{theme_bw}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{2}\NormalTok{)}
+\NormalTok{gam.fit1 <-}\KeywordTok{train}\NormalTok{(train_matrix_x,}
+\NormalTok{                train_matrix_y,}
+                \DataTypeTok{method =} \StringTok{"gam"}\NormalTok{,}
+                \DataTypeTok{tuneGrid =} \KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{method =} \StringTok{"GCV.Cp"}\NormalTok{,}
+                                      \DataTypeTok{select =} \KeywordTok{c}\NormalTok{(}\OtherTok{TRUE}\NormalTok{,}\OtherTok{FALSE}\NormalTok{)),}
+                \DataTypeTok{trControl =}\NormalTok{ ctrl1)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{tree-based-model}{%
+\section{Tree Based model}\label{tree-based-model}}
+
+bagging
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ctrl <-}\StringTok{ }\KeywordTok{trainControl}\NormalTok{(}\DataTypeTok{method =} \StringTok{"repeatedcv"}\NormalTok{, }\DataTypeTok{number =} \DecValTok{10}\NormalTok{, }\DataTypeTok{repeats =} \DecValTok{5}\NormalTok{,}\DataTypeTok{verboseIter =} \OtherTok{TRUE}\NormalTok{)}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{1}\NormalTok{)}
+
+\NormalTok{bg.fit <-}\StringTok{ }\KeywordTok{train}\NormalTok{(weekly_sales }\OperatorTok{~}\StringTok{ }\NormalTok{., }
+\NormalTok{                train.data,}
+                \DataTypeTok{method =} \StringTok{"ranger"}\NormalTok{,}
+                \DataTypeTok{tuneGrid =} \KeywordTok{expand.grid}\NormalTok{(}
+                          \DataTypeTok{mtry =} \DecValTok{55}\NormalTok{, }
+                          \DataTypeTok{splitrule =} \StringTok{"variance"}\NormalTok{,}
+                          \DataTypeTok{min.node.size =} \DecValTok{10}\NormalTok{ ),}
+                \DataTypeTok{importance =} \StringTok{"permutation"}\NormalTok{,}
+                \DataTypeTok{scale.permutation.importance =} \StringTok{"TRUE"}\NormalTok{,}
+                \DataTypeTok{trControl =}\NormalTok{ ctrl)}
+
+\CommentTok{# plot variable of importance }
+\CommentTok{# barplot(sort(ranger::importance(bg.fit$finalModel), decreasing = FALSE),}
+\CommentTok{#         las = 2, horiz = TRUE, cex.names = 0.7)}
+\end{Highlighting}
+\end{Shaded}
+
+Random forest
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{rf.grid <-}\StringTok{ }\KeywordTok{expand.grid}\NormalTok{(}\DataTypeTok{mtry =} \KeywordTok{c}\NormalTok{(}\DecValTok{52}\NormalTok{,}\DecValTok{53}\NormalTok{,}\DecValTok{54}\NormalTok{,}\DecValTok{55}\NormalTok{),}
+                       \DataTypeTok{splitrule =} \StringTok{"variance"}\NormalTok{,}
+                       \DataTypeTok{min.node.size =} \DecValTok{10}\NormalTok{)}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{1}\NormalTok{)}
+\NormalTok{rf.fit <-}\StringTok{ }\KeywordTok{train}\NormalTok{(weekly_sales}\OperatorTok{~}\NormalTok{., train.data,}
+                \DataTypeTok{method =} \StringTok{"ranger"}\NormalTok{,}
+                \DataTypeTok{tuneGrid =}\NormalTok{ rf.grid,}
+                \DataTypeTok{importance =} \StringTok{"permutation"}\NormalTok{,}
+                \DataTypeTok{scale.permutation.importance =} \StringTok{"TRUE"}\NormalTok{,}
+                \DataTypeTok{trControl =}\NormalTok{ ctrl)}
+
+\CommentTok{#rf.fit$bestTune}
+\KeywordTok{ggplot}\NormalTok{(rf.fit, }\DataTypeTok{highlight =} \OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{barplot}\NormalTok{(}\KeywordTok{sort}\NormalTok{(ranger}\OperatorTok{::}\KeywordTok{importance}\NormalTok{(rf.fit}\OperatorTok{$}\NormalTok{finalModel), }\DataTypeTok{decreasing =} \OtherTok{FALSE}\NormalTok{),}
+        \DataTypeTok{las =} \DecValTok{2}\NormalTok{, }\DataTypeTok{horiz =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{cex.names =} \FloatTok{0.7}\NormalTok{)}
+\CommentTok{#varImp(rf.fit)}
+\end{Highlighting}
+\end{Shaded}
+
+regression tree
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Use CP from above pruned model, cp is complexity parameter}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{1}\NormalTok{)}
+\NormalTok{rpart.fit <-}\StringTok{ }\KeywordTok{train}\NormalTok{(weekly_sales}\OperatorTok{~}\NormalTok{., train.data,}
+                   \DataTypeTok{method =} \StringTok{"rpart"}\NormalTok{,}
+                   \DataTypeTok{tuneGrid =} \KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{cp =} \KeywordTok{exp}\NormalTok{(}\KeywordTok{seq}\NormalTok{(}\OperatorTok{-}\DecValTok{12}\NormalTok{,}\DecValTok{4}\NormalTok{, }\DataTypeTok{length =} \DecValTok{100}\NormalTok{))),}
+                   \DataTypeTok{trControl =}\NormalTok{ ctrl)}
+
+\KeywordTok{plot}\NormalTok{(rpart.fit, }\DataTypeTok{highlight =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{xTrans =} \ControlFlowTok{function}\NormalTok{(x) }\KeywordTok{log}\NormalTok{(x))}
+\end{Highlighting}
+\end{Shaded}
+
+Boosting
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{gbm.grid <-}\StringTok{ }\KeywordTok{expand.grid}\NormalTok{(}\DataTypeTok{n.trees =}\NormalTok{ (}\DecValTok{15}\OperatorTok{:}\DecValTok{20}\NormalTok{)}\OperatorTok{*}\DecValTok{1000}\NormalTok{,}
+                        \DataTypeTok{interaction.depth =} \KeywordTok{c}\NormalTok{(}\DecValTok{7}\NormalTok{,}\DecValTok{9}\NormalTok{),}
+                        \DataTypeTok{shrinkage =} \KeywordTok{c}\NormalTok{(}\FloatTok{0.05}\NormalTok{,}\FloatTok{0.025}\NormalTok{,}\FloatTok{0.01}\NormalTok{),}
+                        \DataTypeTok{n.minobsinnode =} \KeywordTok{c}\NormalTok{(}\DecValTok{100}\NormalTok{))}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{1}\NormalTok{)}
+\NormalTok{gbm.fit <-}\StringTok{ }\KeywordTok{train}\NormalTok{(weekly_sales}\OperatorTok{~}\NormalTok{., train.data,}
+                 \DataTypeTok{method =} \StringTok{"gbm"}\NormalTok{,}
+                 \DataTypeTok{tuneGrid =}\NormalTok{ gbm.grid,}
+                 \DataTypeTok{trControl =}\NormalTok{ ctrl,}
+                 \DataTypeTok{verbose =} \OtherTok{TRUE}\NormalTok{)}
+
+\KeywordTok{ggplot}\NormalTok{(gbm.fit, }\DataTypeTok{highlight =} \OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(gbm.fit)}
+\KeywordTok{summary}\NormalTok{(gbm.fit) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{plot}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{model-selection}{%
+\section{Model Selection}\label{model-selection}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{resamp <-}\StringTok{ }\KeywordTok{resamples}\NormalTok{(}\KeywordTok{list}\NormalTok{(}\DataTypeTok{lasso =}\NormalTok{ lasso.fit, }
+                         \DataTypeTok{ridge =}\NormalTok{ ridge.fit,}
+                         \DataTypeTok{enet =}\NormalTok{ enet.fit,}
+                         \DataTypeTok{lm =}\NormalTok{ lm.fit,}
+                         \DataTypeTok{pcr =}\NormalTok{ pcr.fit,}
+                         \DataTypeTok{pls =}\NormalTok{ pls.fit,}
+                         \DataTypeTok{gam =}\NormalTok{ gam.fit,}
+                         \DataTypeTok{bagging =}\NormalTok{ bg.fit,}
+                         \DataTypeTok{rf=}\NormalTok{rf.fit,}
+                         \DataTypeTok{regression_tree =}\NormalTok{ rpart.fit,}
+                         \DataTypeTok{boosting=}\NormalTok{gbm.fit))}
+
+\KeywordTok{bwplot}\NormalTok{(resamp, }\DataTypeTok{metric =} \StringTok{"RMSE"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+test set performance
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lm_pred =}\StringTok{ }\KeywordTok{predict}\NormalTok{(lm.fit, }\DataTypeTok{newdata =}\NormalTok{ test.data)}
+\NormalTok{lasso_pred =}\StringTok{ }\KeywordTok{predict}\NormalTok{(lasso.fit, }\DataTypeTok{newdata =}\NormalTok{ test.data)}
+\NormalTok{ridge_pred =}\StringTok{ }\KeywordTok{predict}\NormalTok{(ridge.fit, }\DataTypeTok{newdata =}\NormalTok{ test.data)}
+\NormalTok{enet_pred =}\StringTok{ }\KeywordTok{predict}\NormalTok{(enet.fit, }\DataTypeTok{newdata =}\NormalTok{ test.data)}
+\NormalTok{pcr_pred =}\StringTok{ }\KeywordTok{predict}\NormalTok{(pcr.fit, }\DataTypeTok{newdata =}\NormalTok{ test.data)}
+\NormalTok{pls_pred =}\StringTok{ }\KeywordTok{predict}\NormalTok{(pls.fit, }\DataTypeTok{newdata =}\NormalTok{ test.data)}
+\CommentTok{#gam_pred = predict(gam.fit, newdata = test.data)}
+
+
+\NormalTok{rpart_pred =}\StringTok{ }\KeywordTok{predict}\NormalTok{(rpart.fit, }\DataTypeTok{newdata =}\NormalTok{ test.data)}
+\CommentTok{#sm_reg_tree = predict(rpart.fit.trim, newdata = test.data)}
+\NormalTok{bagging =}\StringTok{ }\KeywordTok{predict}\NormalTok{(bg.fit, }\DataTypeTok{newdata =}\NormalTok{ test.data)}
+\NormalTok{rf =}\StringTok{ }\KeywordTok{predict}\NormalTok{(rf.fit, }\DataTypeTok{newdata =}\NormalTok{ test.data)}
+\NormalTok{gbm =}\StringTok{ }\KeywordTok{predict}\NormalTok{(gbm.fit, }\DataTypeTok{newdata =}\NormalTok{ test.data)}
+
+\KeywordTok{postResample}\NormalTok{(}\DataTypeTok{pred =}\NormalTok{ lm_pred, }\DataTypeTok{obs =}\NormalTok{ test.data}\OperatorTok{$}\NormalTok{weekly_sales)}
+\KeywordTok{postResample}\NormalTok{(}\DataTypeTok{pred =}\NormalTok{ lasso_pred, }\DataTypeTok{obs =}\NormalTok{ test.data}\OperatorTok{$}\NormalTok{weekly_sales)}
+\KeywordTok{postResample}\NormalTok{(}\DataTypeTok{pred =}\NormalTok{ ridge_pred, }\DataTypeTok{obs =}\NormalTok{ test.data}\OperatorTok{$}\NormalTok{weekly_sales)}
+\KeywordTok{postResample}\NormalTok{(}\DataTypeTok{pred =}\NormalTok{ enet_pred, }\DataTypeTok{obs =}\NormalTok{ test.data}\OperatorTok{$}\NormalTok{weekly_sales)}
+\KeywordTok{postResample}\NormalTok{(}\DataTypeTok{pred =}\NormalTok{ pcr_pred, }\DataTypeTok{obs =}\NormalTok{ test.data}\OperatorTok{$}\NormalTok{weekly_sales)}
+\KeywordTok{postResample}\NormalTok{(}\DataTypeTok{pred =}\NormalTok{ pls_pred, }\DataTypeTok{obs =}\NormalTok{ test.data}\OperatorTok{$}\NormalTok{weekly_sales)}
+
+\KeywordTok{postResample}\NormalTok{(}\DataTypeTok{pred =}\NormalTok{ rpart_pred, }\DataTypeTok{obs =}\NormalTok{ test.data}\OperatorTok{$}\NormalTok{weekly_sales)}
+\CommentTok{#postResample(pred = sm_reg_tree, obs = test.data$weekly_sales)}
+\KeywordTok{postResample}\NormalTok{(}\DataTypeTok{pred =}\NormalTok{ bagging, }\DataTypeTok{obs =}\NormalTok{ test.data}\OperatorTok{$}\NormalTok{weekly_sales)}
+\KeywordTok{postResample}\NormalTok{(}\DataTypeTok{pred =}\NormalTok{ rf, }\DataTypeTok{obs =}\NormalTok{ test.data}\OperatorTok{$}\NormalTok{weekly_sales)}
+\KeywordTok{postResample}\NormalTok{(}\DataTypeTok{pred =}\NormalTok{ gbm, }\DataTypeTok{obs =}\NormalTok{ test.data}\OperatorTok{$}\NormalTok{weekly_sales)}
+
+
+
+\NormalTok{test_perfm =}\StringTok{ }\KeywordTok{rbind}\NormalTok{(}\KeywordTok{postResample}\NormalTok{(}\DataTypeTok{pred =}\NormalTok{ lm_pred, }\DataTypeTok{obs =}\NormalTok{ test.data}\OperatorTok{$}\NormalTok{weekly_sales),}
+\KeywordTok{postResample}\NormalTok{(}\DataTypeTok{pred =}\NormalTok{ lasso_pred, }\DataTypeTok{obs =}\NormalTok{ test.data}\OperatorTok{$}\NormalTok{weekly_sales),}
+\KeywordTok{postResample}\NormalTok{(}\DataTypeTok{pred =}\NormalTok{ ridge_pred, }\DataTypeTok{obs =}\NormalTok{ test.data}\OperatorTok{$}\NormalTok{weekly_sales),}
+\KeywordTok{postResample}\NormalTok{(}\DataTypeTok{pred =}\NormalTok{ enet_pred, }\DataTypeTok{obs =}\NormalTok{ test.data}\OperatorTok{$}\NormalTok{weekly_sales),}
+\KeywordTok{postResample}\NormalTok{(}\DataTypeTok{pred =}\NormalTok{ pcr_pred, }\DataTypeTok{obs =}\NormalTok{ test.data}\OperatorTok{$}\NormalTok{weekly_sales),}
+\KeywordTok{postResample}\NormalTok{(}\DataTypeTok{pred =}\NormalTok{ pls_pred, }\DataTypeTok{obs =}\NormalTok{ test.data}\OperatorTok{$}\NormalTok{weekly_sales),}
+
+\KeywordTok{postResample}\NormalTok{(}\DataTypeTok{pred =}\NormalTok{ rpart_pred, }\DataTypeTok{obs =}\NormalTok{ test.data}\OperatorTok{$}\NormalTok{weekly_sales),}
+\CommentTok{#postResample(pred = sm_reg_tree, obs = test.data$weekly_sales),}
+\KeywordTok{postResample}\NormalTok{(}\DataTypeTok{pred =}\NormalTok{ bagging, }\DataTypeTok{obs =}\NormalTok{ test.data}\OperatorTok{$}\NormalTok{weekly_sales),}
+\KeywordTok{postResample}\NormalTok{(}\DataTypeTok{pred =}\NormalTok{ rf, }\DataTypeTok{obs =}\NormalTok{ test.data}\OperatorTok{$}\NormalTok{weekly_sales),}
+\KeywordTok{postResample}\NormalTok{(}\DataTypeTok{pred =}\NormalTok{ gbm, }\DataTypeTok{obs =}\NormalTok{ test.data}\OperatorTok{$}\NormalTok{weekly_sales))}
+
+\KeywordTok{rownames}\NormalTok{(test_perfm) =}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"lm"}\NormalTok{,}\StringTok{"lasso"}\NormalTok{,}\StringTok{"ridge"}\NormalTok{,}\StringTok{"enet"}\NormalTok{,}\StringTok{"pcr"}\NormalTok{,}\StringTok{"pls"}\NormalTok{,}\StringTok{"rpart"}\NormalTok{,}\StringTok{"bagging"}\NormalTok{,}\StringTok{"rf"}\NormalTok{,}\StringTok{"gbm"}\NormalTok{)}
+\KeywordTok{round}\NormalTok{(test_perfm,}\DecValTok{1}\NormalTok{)}
+
+\NormalTok{trans <-}\StringTok{ }\KeywordTok{preProcess}\NormalTok{(x, }\DataTypeTok{method =} \KeywordTok{c}\NormalTok{(}\StringTok{"scale"}\NormalTok{))}
+\NormalTok{predy2.pls2 <-}\KeywordTok{predict}\NormalTok{(pls.fit}\OperatorTok{$}\NormalTok{finalModel,}
+                      \DataTypeTok{newdata =}\NormalTok{test_matrix_x,}
+                      \DataTypeTok{ncomp =}\NormalTok{ pls.fit}\OperatorTok{$}\NormalTok{bestTune}\OperatorTok{$}\NormalTok{ncomp)}
+\KeywordTok{mean}\NormalTok{((predy2.pls2}\OperatorTok{-}\NormalTok{test_matrix_y)}\OperatorTok{^}\DecValTok{2}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{sqrt}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+
+\end{document}

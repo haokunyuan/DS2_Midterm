@@ -1,10 +1,12 @@
 ---
 title: "final all model"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,eval = FALSE)
 library(tidyverse)
 library(caret)
 library(doParallel)
@@ -68,6 +70,7 @@ featurePlot(x = dept1_data_plot[,c(-3)],
 plot_x = as.matrix(dept1_data_plot)
 corrplot::corrplot(cor(plot_x))
 ```
+
 # test and train split
 ```{r}
 # seperate test and train 
@@ -86,7 +89,7 @@ test_matrix_y =  test.data$weekly_sales
 ```
 
 
-# linear models 
+# linear & non-linear models 
 ```{r}
 ctrl1 <- trainControl(method = "repeatedcv", number = 10, repeats = 5)
 #linear 
@@ -171,7 +174,7 @@ pls.fit <-train(weekly_sales~.,
 ggplot(pls.fit, highlight = TRUE)+ theme_bw()
 ```
 
-# gam 
+gam 
 ```{r}
 set.seed(2)
 gam.fit <-train(weekly_sales~.,
@@ -251,7 +254,7 @@ plot(rpart.fit, highlight = TRUE, xTrans = function(x) log(x))
                  
 ```
 
-# Boosting
+Boosting
 ```{r}
 gbm.grid <- expand.grid(n.trees = (15:20)*1000,
                         interaction.depth = c(7,9),
@@ -266,14 +269,14 @@ gbm.fit <- train(weekly_sales~., train.data,
 
 ggplot(gbm.fit, highlight = TRUE)
 ```
+
 ```{r}
 summary(gbm.fit)
 summary(gbm.fit) %>% plot()
 ```
 
 
-
-Model Selection
+# Model Selection
 ```{r}
 resamp <- resamples(list(lasso = lasso.fit, 
                          ridge = ridge.fit,
@@ -290,8 +293,7 @@ resamp <- resamples(list(lasso = lasso.fit,
 bwplot(resamp, metric = "RMSE")
 ```
 
-# test set performance 
-
+test set performance 
 ```{r}
 lm_pred = predict(lm.fit, newdata = test.data)
 lasso_pred = predict(lasso.fit, newdata = test.data)
@@ -345,11 +347,6 @@ predy2.pls2 <-predict(pls.fit$finalModel,
                       ncomp = pls.fit$bestTune$ncomp)
 mean((predy2.pls2-test_matrix_y)^2) %>% sqrt()
 
-
-#
-# predy2.pcr2 <- predict(pcr.fit$finalModel, 
-#                        newdata = predict(trans,test.data),
-#                        ncomp = pcr.fit$bestTune[[1]])
 ```
 
 
