@@ -17,40 +17,53 @@ library(rpart.plot)
 Data Cleaning
 
 ```{r}
-df = read_csv("data/final_data_one_store.csv") %>% 
-  janitor::clean_names()
-df = df[-1:-2] %>% filter(dept == 1)
+df = read_csv("data/merged_data_2.csv") %>%
+  janitor::clean_names() %>% 
+  filter(dept == 3) %>% 
+  dplyr::select(is_holiday,weekly_sales,cpi,unemployment,size,type,temperature, fuel_price)
 
-df$dept = as.factor(df$dept)
+df$is_holiday=as.factor(df$is_holiday)
+df$type = as.factor((df$type))
 ```
 
 
-# caret regression tree
+```{r}
+set.seed(1)
+rowTrain <- createDataPartition(y = df$weekly_sales,
+                                p = 0.75,
+                                list = FALSE)
+ctrl <- trainControl(method = "cv")
+```
+
+# purne regression tree by lowest cross-validation errot
 
 ```{r}
-head(df)
-# train_data = createDataPartition(y = df$weekly_sales,
-#                                p = 0.75,
-#                                list = FALSE)
-
-ctrl <- trainControl(method = "cv")
-
-set.seed(1)
 # Use CP from above pruned model, cp is complexity parameter
-
+set.seed(1)
 rpart.fit <- train(weekly_sales~., df,
                    method = "rpart",
-                   tuneGrid = data.frame(cp = exp(seq(-5,1, length = 30))),
+                   tuneGrid = data.frame(cp = exp(seq(-5,2, length = 100))),
                    trControl = ctrl)
 
 ggplot(rpart.fit, highlight = TRUE)
                  
 rpart.plot(rpart.fit$finalModel)
+# rmse 
+predicted_value = predict(rpart.fit, newdata = df[rowTrain,])
+rmse = sqrt(mean((df$weekly_sales-predicted_value)^2))
+                          
+```
 
+# purne regression tree by 1 se rule
 
+```{r}
 tree1 = rpart(formula = weekly_sales~.,data = df)
-
 rpart.plot(tree1)
-
+cptable = printcp(tree1)
+plotcp(tree1)
+# 1 SE RULLR
+tree4 = prune(tree1, cp=cptable[cptable[,4]<cptable[min.error,4]+cptable[min.error,5],1][1])
+rpart.plot(tree4)
+predict(tree4,data = df[rowTrain,])
 ```
 
