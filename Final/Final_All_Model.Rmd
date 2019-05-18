@@ -161,7 +161,7 @@ set.seed(2)
 pls.fit <-train(weekly_sales~.,
                 data= train.data,
                 method = "pls",
-                tuneLength = 34,
+                tuneLength =55,
                 trControl = ctrl1,
                 scale = TRUE)
 
@@ -197,8 +197,9 @@ gam.fit1 <-train(train_matrix_x,
 # Tree Based model 
 bagging 
 ```{r}
-ctrl <- trainControl(method = "cv")
+ctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 5,verboseIter = TRUE)
 set.seed(1)
+
 bg.fit <- train(weekly_sales ~ ., 
                 train.data,
                 method = "ranger",
@@ -208,25 +209,55 @@ bg.fit <- train(weekly_sales ~ .,
                           min.node.size = 10 ),
                 importance = "permutation",
                 scale.permutation.importance = "TRUE",
-                trControl = ctrl1)
+                trControl = ctrl)
 
 # plot variable of importance 
-barplot(sort(ranger::importance(bg.fit$finalModel), decreasing = FALSE),
-        las = 2, horiz = TRUE, cex.names = 0.7)
+# barplot(sort(ranger::importance(bg.fit$finalModel), decreasing = FALSE),
+#         las = 2, horiz = TRUE, cex.names = 0.7)
 ```
 Random forest 
 ```{r}
-rf.grid <- expand.grid(mtry = seq(4,134,10),
+rf.grid <- expand.grid(mtry = c(52,53,54,55),
                        splitrule = "variance",
                        min.node.size = 10)
 set.seed(1)
-rf.fit <- train(weekly_sales~., df,
+rf.fit <- train(weekly_sales~., train.data,
                 method = "ranger",
                 tuneGrid = rf.grid,
                 trControl = ctrl)
 
 #rf.fit$bestTune
 ggplot(rf.fit, highlight = TRUE)
+```
+regression tree 
+```{r}
+# Use CP from above pruned model, cp is complexity parameter
+set.seed(1)
+rpart.fit <- train(weekly_sales~., train.data,
+                   method = "rpart",
+                   tuneGrid = data.frame(cp = exp(seq(-12,4, length = 100))),
+                   trControl = ctrl)
+
+plot(rpart.fit, highlight = TRUE, xTrans = function(x) log(x))
+                 
+```
+# Boosting
+```{r}
+gbm.grid <- expand.grid(n.trees = (5:10)*1000,
+                        interaction.depth = c(5,7,9),
+                        shrinkage = c(0.05,0.025,0.01),
+                        n.minobsinnode = c(100))
+set.seed(1)
+gbm.fit <- train(weekly_sales~., train.data,
+                 method = "gbm",
+                 tuneGrid = gbm.grid,
+                 trControl = ctrl,
+                 verbose = FALSE)
+
+ggplot(gbm.fit, highlight = TRUE)
+```
+```{r}
+varImp(gbm.fit)
 ```
 
 
@@ -239,12 +270,76 @@ resamp <- resamples(list(lasso = lasso.fit,
                          lm = lm.fit,
                          pcr = pcr.fit,
                          pls = pls.fit,
-                         gam = gam.fit))
+                         gam = gam.fit,
+                         bagging = bg.fit,
+                         rf=rf.fit,
+                         regression_tree = rpart.fit,
+                         boosting=gbm.fit))
 
 bwplot(resamp, metric = "RMSE")
 ```
 
+# test set performance 
 
+```{r}
+lm_pred = predict(lm.fit, newdata = test.data)
+lasso_pred = predict(lasso.fit, newdata = test.data)
+ridge_pred = predict(ridge.fit, newdata = test.data)
+enet_pred = predict(enet.fit, newdata = test.data)
+pcr_pred = predict(pcr.fit, newdata = test.data)
+pls_pred = predict(pls.fit, newdata = test.data)
+#gam_pred = predict(gam.fit, newdata = test.data)
+
+
+rpart_pred = predict(rpart.fit, newdata = test.data)
+#sm_reg_tree = predict(rpart.fit.trim, newdata = test.data)
+bagging = predict(bg.fit, newdata = test.data)
+rf = predict(rf.fit, newdata = test.data)
+gbm = predict(gbm.fit, newdata = test.data)
+
+postResample(pred = lm_pred, obs = test.data$weekly_sales)
+postResample(pred = lasso_pred, obs = test.data$weekly_sales)
+postResample(pred = ridge_pred, obs = test.data$weekly_sales)
+postResample(pred = enet_pred, obs = test.data$weekly_sales)
+postResample(pred = pcr_pred, obs = test.data$weekly_sales)
+postResample(pred = pls_pred, obs = test.data$weekly_sales)
+
+postResample(pred = rpart_pred, obs = test.data$weekly_sales)
+#postResample(pred = sm_reg_tree, obs = test.data$weekly_sales)
+postResample(pred = bagging, obs = test.data$weekly_sales)
+postResample(pred = rf, obs = test.data$weekly_sales)
+postResample(pred = gbm, obs = test.data$weekly_sales)
+
+
+
+test_perfm = rbind(postResample(pred = lm_pred, obs = test.data$weekly_sales),
+postResample(pred = lasso_pred, obs = test.data$weekly_sales),
+postResample(pred = ridge_pred, obs = test.data$weekly_sales),
+postResample(pred = enet_pred, obs = test.data$weekly_sales),
+postResample(pred = pcr_pred, obs = test.data$weekly_sales),
+postResample(pred = pls_pred, obs = test.data$weekly_sales),
+
+postResample(pred = rpart_pred, obs = test.data$weekly_sales),
+#postResample(pred = sm_reg_tree, obs = test.data$weekly_sales),
+postResample(pred = bagging, obs = test.data$weekly_sales),
+postResample(pred = rf, obs = test.data$weekly_sales),
+postResample(pred = gbm, obs = test.data$weekly_sales))
+
+rownames(test_perfm) = c("lm","lasso","ridge","enet","pcr","pls","rpart","bagging","rf","gbm")
+round(test_perfm,1)
+
+trans <- preProcess(x, method = c("scale"))
+predy2.pls2 <-predict(pls.fit$finalModel,
+                      newdata =test_matrix_x,
+                      ncomp = pls.fit$bestTune$ncomp)
+mean((predy2.pls2-test_matrix_y)^2) %>% sqrt()
+
+
+#
+# predy2.pcr2 <- predict(pcr.fit$finalModel, 
+#                        newdata = predict(trans,test.data),
+#                        ncomp = pcr.fit$bestTune[[1]])
+```
 
 
 
