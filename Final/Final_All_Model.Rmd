@@ -224,11 +224,20 @@ set.seed(1)
 rf.fit <- train(weekly_sales~., train.data,
                 method = "ranger",
                 tuneGrid = rf.grid,
+                importance = "permutation",
+                scale.permutation.importance = "TRUE",
                 trControl = ctrl)
 
 #rf.fit$bestTune
 ggplot(rf.fit, highlight = TRUE)
 ```
+```{r}
+barplot(sort(ranger::importance(rf.fit$finalModel), decreasing = FALSE),
+        las = 2, horiz = TRUE, cex.names = 0.7)
+#varImp(rf.fit)
+```
+
+
 regression tree 
 ```{r}
 # Use CP from above pruned model, cp is complexity parameter
@@ -243,8 +252,8 @@ plot(rpart.fit, highlight = TRUE, xTrans = function(x) log(x))
 ```
 # Boosting
 ```{r}
-gbm.grid <- expand.grid(n.trees = (5:10)*1000,
-                        interaction.depth = c(5,7,9),
+gbm.grid <- expand.grid(n.trees = (15:20)*1000,
+                        interaction.depth = c(7,9),
                         shrinkage = c(0.05,0.025,0.01),
                         n.minobsinnode = c(100))
 set.seed(1)
@@ -252,7 +261,7 @@ gbm.fit <- train(weekly_sales~., train.data,
                  method = "gbm",
                  tuneGrid = gbm.grid,
                  trControl = ctrl,
-                 verbose = FALSE)
+                 verbose = TRUE)
 
 ggplot(gbm.fit, highlight = TRUE)
 ```
