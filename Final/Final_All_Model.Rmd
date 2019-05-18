@@ -1,0 +1,34 @@
+---
+title: "final all model"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+# Exploratory analysis 
+```{r}
+# read and process data
+dept1_data = read_csv("../data/final_data_one_department.csv") %>% janitor::clean_names()
+head(dept1_data)
+# remove index 
+dept1_data = dept1_data[-1]
+
+# no type need to be changed. 
+```
+# distribtuion of response and corrlation 
+
+```{r}
+dept1_data %>% 
+  ggplot() + 
+  geom_histogram(aes(x = weekly_sales))+
+  theme_minimal()+
+  ggtitle("Distribution of Weekly Sales")
+```
+
+```{r}
+
+```
+
