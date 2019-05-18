@@ -6,6 +6,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(caret)
 ```
 
 # Exploratory analysis 
@@ -15,12 +16,23 @@ dept1_data = read_csv("../data/final_data_one_department.csv") %>% janitor::clea
 head(dept1_data)
 # remove index 
 dept1_data = dept1_data[-1]
-
 # no type need to be changed. 
+dept1_data$is_holiday = as.factor(dept1_data$is_holiday)
+dept1_data$type = as.factor(dept1_data$type)
+
+skimr::skim(dept1_data)
 ```
+```{r}
+# create a data frame for plot only 
+dept1_data_plot = dept1_data
+dept1_data_plot$is_holiday = as.numeric(dept1_data_plot$is_holiday)
+dept1_data_plot$type = as.numeric(as.factor(dept1_data_plot$type))
+```
+
 # distribtuion of response and corrlation 
 
 ```{r}
+# figure 1 distribution of response 
 dept1_data %>% 
   ggplot() + 
   geom_histogram(aes(x = weekly_sales))+
@@ -28,7 +40,28 @@ dept1_data %>%
   ggtitle("Distribution of Weekly Sales")
 ```
 
-```{r}
+```{r, fig.height = 4}
+# set theme 
+theme1 <- trellis.par.get()
+theme1$plot.symbol$col <- rgb(.2, .4, .2, .5)
+theme1$plot.symbol$pch <- 16
+theme1$plot.line$col <- rgb(.8, .1, .1, 1)
+theme1$plot.line$lwd <- 2
+theme1$strip.background$col <- rgb(.0, .2, .6, .2)
+trellis.par.set(theme1)
 
+featurePlot(x = dept1_data_plot[,c(-3)],
+            y = dept1_data$weekly_sales,
+            span = .5, 
+            plot = "scatter",
+            type = c("p","smooth"),
+            layout= c(4,3))
+
+
+```
+
+```{r}
+plot_x = as.matrix(dept1_data_plot)
+corrplot::corrplot(cor(plot_x))
 ```
 
